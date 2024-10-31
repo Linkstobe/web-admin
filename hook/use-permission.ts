@@ -9,5 +9,5 @@ interface PermissionStore {
 export const usePermission = create<PermissionStore>((set, get) => ({
   permission: "",
   setPermission: (permission: string) => set({ permission }),
-  canEdit: () => get().permission === "edit",
+  canEdit: () => get().permission === "editar",
 }))
