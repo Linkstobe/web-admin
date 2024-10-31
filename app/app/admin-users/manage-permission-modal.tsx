@@ -4,6 +4,7 @@ import { Modal } from "@/components/modal"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePermission } from "@/hook/use-permission"
 import { useToast } from "@/hooks/use-toast"
 import { UserService } from "@/services/user.service"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -21,6 +22,7 @@ export default function ManagePermissionModal ({
   userId
 }: ManagePermissionModalProps) {
   const { toast } = useToast()
+  const { canEdit } = usePermission()
 
   const managePermissionSchema = z.object({
     permission: z
@@ -41,6 +43,16 @@ export default function ManagePermissionModal ({
       const {
         permission
       } = values
+
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao modificar permissão",
+          description: "Você não possui permissão para modificar as permissões de um usuário. Entre em contato com o administrador.",
+        })
+        return
+      }
 
       await UserService.updateUserById(userId, {
         permission: permission === "Sem permissões" ? "" : (permission !== "Somente ver" ? "editar" : "ver")

@@ -23,10 +23,12 @@ import { useState } from "react";
 import { ICoupon } from "@/interfaces/ICoupons";
 import { CouponService } from "@/services/coupons.service";
 import { useToast } from "@/hooks/use-toast";
+import { usePermission } from "@/hook/use-permission";
 
 
 export default function CreateNewCouponModal () {
   const { toast } = useToast()
+  const { canEdit } = usePermission()
 
   const [discountType, setDiscountType] = useState<string>("Porcentagem");
   const [expirationType, setExpirationType] = useState<string>("Pela data")
@@ -130,7 +132,15 @@ export default function CreateNewCouponModal () {
     } = values
 
     try {
-      console.log({ values })
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao criar cupom",
+          description: "Você não possui permissão para criar um cupom. Entre em contato com o administrador.",
+        })
+        return
+      }
 
       const data: ICoupon = {
         duration: "once",

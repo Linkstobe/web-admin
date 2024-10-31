@@ -6,6 +6,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { usePermission } from "@/hook/use-permission"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { UserService } from "@/services/user.service"
@@ -17,6 +18,7 @@ import { z } from "zod"
 
 export default function CreateAdminUserForm () {
   const { toast } = useToast()
+  const { canEdit } = usePermission()
 
   const [creationType, setCreationType] = useState<string>("Criar novo usuário")
   const [showPassword, setShowPassword] = useState<boolean>(false)
@@ -90,105 +92,7 @@ export default function CreateAdminUserForm () {
         });
       }
     }
-    // if (creationType === "Usuário já existente") {
-    //   if (!data.selectedUser) {
-    //     ctx.addIssue({
-    //       code: "custom",
-    //       path: ["selectedUser"],
-    //       message: "Escolha o usuário para transformar em administrador",
-    //     });
-    //   }
-    // } else {
-    //   if (!data.name) {
-    //     ctx.addIssue({
-    //       code: "custom",
-    //       path: ["name"],
-    //       message: "O nome é obrigatório para criar um novo usuário",
-    //     });
-    //   }
-    //   if (!data.email) {
-    //     ctx.addIssue({
-    //       code: "custom",
-    //       path: ["email"],
-    //       message: "O email é obrigatório para criar um novo usuário",
-    //     });
-    //   }
-    //   if (!data.password) {
-    //     ctx.addIssue({
-    //       code: "custom",
-    //       path: ["password"],
-    //       message: "A senha é obrigatória para criar um novo usuário",
-    //     });
-    //   }
-    // }
   });
-
-
-  // const createAdminUserSchema = z
-  //   .object({
-  //     userCreationType: z
-  //       .string({
-  //         required_error: "Escolha criar um novo usuário ou escolher um existente",
-  //       })
-  //       .optional(),
-  //     name: z
-  //       .string()
-  //       .min(3, "O nome deve ter no mínimo 3 caracteres")
-  //       .nullable(), // Set nullable
-  //     email: z
-  //       .string()
-  //       .email("Email inválido")
-  //       .nullable(), // Set nullable
-  //     password: z
-  //       .string()
-  //       .min(8, "A senha deve ter no mínimo 8 caracteres")
-  //       .nullable(), // Set nullable
-  //     permissions: z
-  //       .string({
-  //         required_error: "Escolher uma permissão é obrigatório",
-  //       })
-  //       .optional(),
-  //     selectedUser: z
-  //       .string({
-  //         required_error: "Escolha o usuário para transformar em administrador",
-  //       })
-  //       .nullable(), // Set nullable
-  //   })
-  //   .superRefine((data, ctx) => {
-  //     if (data.userCreationType === "Usuário já existente") {
-  //       // Check if selectedUser is provided when using an existing user
-  //       if (!data.selectedUser) {
-  //         ctx.addIssue({
-  //           code: "custom",
-  //           path: ["selectedUser"],
-  //           message: "Escolha o usuário para transformar em administrador",
-  //         });
-  //       }
-  //     } else {
-  //       // Check if name, email, and password are provided when creating a new user
-  //       if (!data.name) {
-  //         ctx.addIssue({
-  //           code: "custom",
-  //           path: ["name"],
-  //           message: "O nome é obrigatório para criar um novo usuário",
-  //         });
-  //       }
-  //       if (!data.email) {
-  //         ctx.addIssue({
-  //           code: "custom",
-  //           path: ["email"],
-  //           message: "O email é obrigatório para criar um novo usuário",
-  //         });
-  //       }
-  //       if (!data.password) {
-  //         ctx.addIssue({
-  //           code: "custom",
-  //           path: ["password"],
-  //           message: "A senha é obrigatória para criar um novo usuário",
-  //         });
-  //       }
-  //     }
-  //   });
 
   const createAdminUserForm = useForm<z.infer<typeof createAdminUserSchema>>({
     resolver: zodResolver(createAdminUserSchema),
@@ -202,61 +106,20 @@ export default function CreateAdminUserForm () {
     }
   })
 
-  // const onSubmit = async (values: z.infer<typeof createAdminUserSchema>) => {
-  //   try {
-  //     const {
-  //       name,
-  //       email,
-  //       password,
-  //       permissions,
-  //       userCreationType,
-  //       selectedUser
-  //     } = values
-  
-  //     console.log({ values });
-  //     return
-      
-
-  //     const existingUser = userCreationType === "Usuário já existente"
-  //     if (existingUser) {
-  //       const userToUpdate = await UserService.getUserById(selectedUser)
-  //       console.log({ userToUpdate });
-  //       return
-  //       await UserService.updateUserById(selectedUser, {
-  //         permission: permissions,
-  //       })
-  //     } else {
-  //       await UserService.createNewUser({
-  //         name,
-  //         email,
-  //         password,
-  //         cellphone: "00",
-  //         permission: permissions,
-  //         profile_photo: "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp"
-  //       })
-  //     }
-
-  //     toast({
-  //       variant: "success",
-  //       title: "Administardor criado!",
-  //       description: "O administrador foi criado com sucesso.",
-  //     })
-
-  //   } catch (error) {
-  //     console.log(error)
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Erro ao criar administrador",
-  //       description: "Ocorreu um erro ao criar o administrador. Tente novamente.",
-  //     })
-  //   }
-
-  // }
-
   const onSubmit = async (values: z.infer<typeof createAdminUserSchema>) => {
     try {
       const { name, email, password, permissions, userCreationType, selectedUser } = values;
       const existingUser = userCreationType === "Usuário já existente";
+
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao criar administrador",
+          description: "Você não possui permissão para criar um administrador. Entre em contato com o administrador.",
+        })
+        return
+      }
 
       console.log("Submitting values:", values)
 

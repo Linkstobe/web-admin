@@ -1,11 +1,16 @@
 "use client"
 
 import { Table } from "@/components/table"
+import { usePermission } from "@/hook/use-permission"
+import { useToast } from "@/hooks/use-toast"
 import { CouponService } from "@/services/coupons.service"
 import { Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function CouponsTable () {
+  const { toast } = useToast()
+  const { canEdit } = usePermission()
+
   const [allCoupons, setAllCoupons] = useState([])
   const [filteredCoupons, setFilteredCoupons] = useState([])
 
@@ -26,6 +31,16 @@ export function CouponsTable () {
 
   const disableCoupon = async (promotionId: string) => {
     try {
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir cupom",
+          description: "Você não possui permissão para excluir um cupom. Entre em contato com o administrador.",
+        })
+        return
+      }
+
       await CouponService.disableCouponByPromotionId(promotionId)
       await getAllCoupons()
     } catch (error) {

@@ -12,6 +12,7 @@ import 'react-phone-input-2/lib/style.css';
 import { UserService } from "@/services/user.service"
 import { ProjectService } from "@/services/project.service"
 import { useToast } from "@/hooks/use-toast"
+import { usePermission } from "@/hook/use-permission"
 
 interface UserInfoChangeModalProps {
   children: ReactNode
@@ -33,6 +34,7 @@ export default function UserInfoChangeModal ({
   projectId
 }: UserInfoChangeModalProps) {
   const { toast } = useToast()
+  const { canEdit } = usePermission()
 
   const userInfoSchema = z.object({
     name: z
@@ -66,6 +68,16 @@ export default function UserInfoChangeModal ({
         email,
         cellphone
       } = values
+
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao editar dados",
+          description: "Você não possui permissão para editar os dados de um usuário/projeto. Entre em contato com o administrador.",
+        })
+        return
+      }
 
       const users = await UserService.getAllUsers()
       const [emailInUse] = users.filter(({ email: userEmail }) => userEmail === email)

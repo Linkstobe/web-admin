@@ -2,6 +2,7 @@ import { Modal } from "@/components/modal";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePermission } from "@/hook/use-permission";
 import { useToast } from "@/hooks/use-toast";
 import { ProjectService } from "@/services/project.service";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,8 @@ export default function PlanChangeModal ({
   projectId
 }: PlanChangeModalProps) {
   const { toast } = useToast()
+  const { canEdit } = usePermission()
+
   const planChangeSchema = z.object({
     plan: z
       .string({ required_error: "O tipo do plano é obrigatório" })
@@ -36,11 +39,16 @@ export default function PlanChangeModal ({
       const {
         plan
       } = values
-      
-      console.log({
-        plan,
-        projectId
-      });
+
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao trocar plano",
+          description: "Você não possui permissão para trocar o plano de um projeto. Entre em contato com o administrador.",
+        })
+        return
+      }
       
       await ProjectService.updateProjectById(projectId,{
         role: plan.toLocaleLowerCase(),
