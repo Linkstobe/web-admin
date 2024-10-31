@@ -34,6 +34,7 @@ export default function SubscriptionConversion ({
       }));
 
       const planSubscriptions = transactions.filter(transaction => transaction.type === "plan");
+      // @ts-ignore
       const freeSubscriptions = projects.filter(project => jwtDecode(project.role)?.role === "basic");
       const proPlanSubscriptions = planSubscriptions.filter(transaction => transaction.amount === "1499" || transaction.amount === "14390");
       const premiumPlanSubscriptions = planSubscriptions.filter(transaction => transaction.amount === "4999" || transaction.amount === "47990");

@@ -16,7 +16,7 @@ export default function ActiveSubscription () {
         const projects = await ProjectService.getAllProject();
 
         const roleCounts = projects.reduce((acc, project) => {
-          const decodedToken = project?.role ? jwtDecode(project.role) : {};
+          const decodedToken: any = project?.role ? jwtDecode(project.role) : {};
           const plan = decodedToken?.role && decodedToken.role.toLowerCase() !== "basic" 
             ? decodedToken.role.toLowerCase() 
             : "free";
