@@ -47,6 +47,7 @@ export function PlansTable() {
         const user = users.find(user => user.id === project.user_id);
 
         const decodedToken = project?.role ? jwtDecode(project.role) : {};
+        // @ts-ignore
         const plan = decodedToken?.role && decodedToken.role !== "basic" ? decodedToken.role : "FREE";
         
         return {

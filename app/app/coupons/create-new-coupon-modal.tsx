@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/modal";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import InputMask from "react-input-mask";
 
@@ -122,9 +122,7 @@ export default function CreateNewCouponModal () {
     const {
       couponName,
       couponExpirationDate,
-      couponLimitation,
       couponDiscountPercent,
-      userAssociatedWithCoupon,
       couponDiscountType,
       couponDiscountValue,
       couponExpirationType,

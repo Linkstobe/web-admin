@@ -21,7 +21,6 @@ export default function CreateAdminUserForm () {
   const { canEdit } = usePermission()
 
   const [creationType, setCreationType] = useState<string>("Criar novo usuário")
-  const [showPassword, setShowPassword] = useState<boolean>(false)
 
   const [usersToSelect, setUsersToSelect] = useState([])
 

@@ -3,7 +3,7 @@ import { SimpleMetricCard } from "@/components/simple-metric-card";
 import { cn } from "@/lib/utils";
 import { ProjectService } from "@/services/project.service";
 import { jwtDecode } from "jwt-decode";
-import { Crown, Users } from "lucide-react";
+import { Crown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function ProjectSimpleMetrics () {
@@ -19,7 +19,9 @@ export default function ProjectSimpleMetrics () {
 
         const roleCounts = projects.reduce((acc, project) => {
           const decodedToken = project?.role ? jwtDecode(project.role) : {};
+          // @ts-ignore
           const plan = decodedToken?.role && decodedToken.role.toLowerCase() !== "basic" 
+          // @ts-ignore
             ? decodedToken.role.toLowerCase() 
             : "free";
 

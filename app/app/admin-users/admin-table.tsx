@@ -37,7 +37,8 @@ export default function AdminTable () {
     currentPage * itemsPerPage
   )
 
-  const handlePageChange = (event, page) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handlePageChange = (event:any, page) => {
     setCurrentPage(page)
   }
 

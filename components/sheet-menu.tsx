@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookUp2, MenuIcon, PanelsTopLeft } from 'lucide-react'
+import { MenuIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import Menu from '@/components/menu'
@@ -8,7 +8,6 @@ import {
   SheetHeader,
   SheetContent,
   SheetTrigger,
-  SheetTitle
 } from '@/components/ui/sheet'
 import Image from 'next/image'
 

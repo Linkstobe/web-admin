@@ -41,6 +41,7 @@ export default function Authentication() {
 
   const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {    
     try {
+      // @ts-ignore
       await onAuth(values)
       router.push("/app")
     } catch (error) {

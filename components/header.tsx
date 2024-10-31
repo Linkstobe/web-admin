@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, Slash, Store } from "lucide-react"
+import { Slash, Store } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,

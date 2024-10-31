@@ -3,7 +3,6 @@
 import { handleGetMenuList } from "@/lib/menu-list"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
-import { useEffect } from "react"
 import { Button } from "./ui/button"
 import Link from "next/link"
 import { Ellipsis, LogOut } from "lucide-react"
