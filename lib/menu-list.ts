@@ -1,6 +1,5 @@
 import { 
   ChartNoAxesCombined, 
-  CreditCard, 
   Crown, 
   LayoutDashboard, 
   LucideIcon, 

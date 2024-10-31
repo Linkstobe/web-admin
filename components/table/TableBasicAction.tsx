@@ -1,8 +1,7 @@
 "use client"; 
 import { LucideIcon } from "lucide-react";
-import { ButtonHTMLAttributes, ReactElement } from "react";
+import { ButtonHTMLAttributes } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { Button } from "../ui/button";
 
 interface TableBasicActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: LucideIcon;

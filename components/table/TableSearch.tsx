@@ -1,4 +1,4 @@
-import { LucideIcon, Search } from "lucide-react"
+import { Search } from "lucide-react"
 
 interface TableSearchProps {
   placeholder: string
