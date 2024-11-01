@@ -16,7 +16,7 @@ export default function useAuth () {
         throw new Error("Erro ao tentar fazer login")
       }
 
-      usePermission.getState().setPermission(res.user.permission)      
+      usePermission.getState().setPermission(res.user.permission)
       
       await StorageHelper.setItem("user", res.user);
       await StorageHelper.setItem("token", res.token)

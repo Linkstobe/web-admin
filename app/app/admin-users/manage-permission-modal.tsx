@@ -43,7 +43,7 @@ export default function ManagePermissionModal ({
       const {
         permission
       } = values
-
+      
       const userCanEdit = canEdit()
       if (!userCanEdit) {
         toast({
