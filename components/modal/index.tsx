@@ -1,3 +1,4 @@
+import ModalCloseButton from "./ModalCloseButton";
 import ModalContainer from "./ModalContainer";
 import ModalContent from "./ModalContent";
 import ModalFooter from "./ModalFooter";
@@ -9,6 +10,7 @@ import ModalTitle from "./ModalTitle";
 export const Modal = {
   Root: ModalRoot,
   OpenButton: ModalOpenButton,
+  CloseButton: ModalCloseButton,
   Container: ModalContainer,
   Header: ModalHeader,
   Title: ModalTitle,

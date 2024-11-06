@@ -15,8 +15,14 @@ import UserInfoChangeModal from "./user-info-change-modal"
 
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import { useToast } from "@/hooks/use-toast"
+import { usePermission } from "@/hook/use-permission"
+import ConfirmationModal from "@/components/confirmation-modal"
 
 export function PlansTable() {
+  const { toast } = useToast()
+  const { canEdit } = usePermission()
+
   const [allProjects, setAllProjects] = useState([])
   const [filteredProjects, setFilteredProjects] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -37,34 +43,35 @@ export function PlansTable() {
     setFilteredProjects(filteredData)
     setCurrentPage(1)
   }
+  
+  const getAllProject = async () => {
+    const projects = await ProjectService.getAllProject()
+    const users = await UserService.getAllUsers()
+
+    const combinedData = projects.map(project => {
+      const user = users.find(user => user.id === project.user_id);
+
+      const decodedToken = project?.role ? jwtDecode(project.role) : {};
+      // @ts-ignore
+      const plan = decodedToken?.role && decodedToken.role !== "basic" ? decodedToken.role : "FREE";
+      
+      return {
+        linkstoBe: project.linkstoBe,
+        name: user?.name || '',
+        email: user?.email || '',
+        cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
+        plan,
+        project_id: project.id,
+        user_id: user.id,
+        projectCreatedAt: new Date(project.createdAt).toLocaleDateString('pt-BR')
+      };
+    });
+    
+    setAllProjects(combinedData)
+    setFilteredProjects(combinedData)
+  }
 
   useEffect(() => {
-    const getAllProject = async () => {
-      const projects = await ProjectService.getAllProject()
-      const users = await UserService.getAllUsers()
-
-      const combinedData = projects.map(project => {
-        const user = users.find(user => user.id === project.user_id);
-
-        const decodedToken = project?.role ? jwtDecode(project.role) : {};
-        // @ts-ignore
-        const plan = decodedToken?.role && decodedToken.role !== "basic" ? decodedToken.role : "FREE";
-        
-        return {
-          linkstoBe: project.linkstoBe,
-          name: user?.name || '',
-          email: user?.email || '',
-          cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
-          plan,
-          project_id: project.id,
-          user_id: user.id
-        };
-      });
-      
-      setAllProjects(combinedData)
-      setFilteredProjects(combinedData)
-    }
-
     getAllProject()
   }, [])
 
@@ -75,6 +82,37 @@ export function PlansTable() {
 
   const handlePageChange = (event, page) => {
     setCurrentPage(page)
+  }
+
+
+  const handleDeleteProject = async (id: string | number) => {
+    try {
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir projeto",
+          description: "Você não possui permissão para excluir o projeto. Entre em contato com o administrador.",
+        })
+        return
+      }
+
+      await ProjectService.deleteProjectByID(id)
+      toast({
+        variant: "success",
+        title: "Projeto excluído!",
+        description: "O projeto foi excluído com sucesso.",
+      })
+
+      getAllProject()
+    } catch (error) {
+      console.log(error)
+      toast({
+        variant: "destructive",
+        title: "Erro ao trocar o plano",
+        description: "Ocorreu um erro ao fazer a troca do plano. Tente novamente.",
+      })
+    }
   }
 
   return (
@@ -102,6 +140,7 @@ export function PlansTable() {
             <Table.HeaderItem title="Link do usuário" />
             <Table.HeaderItem title="Email" />
             <Table.HeaderItem title="Telefone" />
+            <Table.HeaderItem title="Data de criação" />
             <Table.HeaderItem title="Plano" />
             <Table.HeaderItem title="" />
           </Table.Row>
@@ -109,12 +148,13 @@ export function PlansTable() {
 
         <Table.BodySection>
           {
-            paginatedProjects.map(({ name, linkstoBe, email, cellphone, plan, project_id, user_id }, index) => (
+            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, plan, project_id, user_id }, index) => (
               <Table.Row key={index}>
                 <Table.BodyItem text={name} />
                 <Table.BodyItem text={"linksto.be/" + linkstoBe} />
                 <Table.BodyItem text={email} />
                 <Table.BodyItem text={cellphone} />
+                <Table.BodyItem text={projectCreatedAt} />
                 <Table.BodyItem>
                   <Badge
                     className={
@@ -162,6 +202,18 @@ export function PlansTable() {
                           Alterar assinatura
                         </Button>
                       </PlanChangeModal>
+                      <ConfirmationModal
+                        onConfirm={() => handleDeleteProject(project_id)}
+                        title="Confirmação de exclusão do projeto"
+                        description="Você está preste a deletar esse projeto. Isso implica na sua exclusão e todos os seus itens. Deseja excluir projeto?"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full text-start justify-start rounded-none text-[#767676]"
+                        >
+                          Excluir projeto
+                        </Button>
+                      </ConfirmationModal>
                     </PopoverContent>
                   </Popover>
                 </Table.BodyItem>
