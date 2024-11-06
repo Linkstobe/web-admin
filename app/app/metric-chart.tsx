@@ -17,7 +17,6 @@ export default function MetricChart({
 }: MetricChartProps) {
   return (
     <div 
-      // style={{ width: '100%', height: 400 }}
       className='w-full h-96 py-4'
     >
       <ResponsiveContainer 
@@ -34,7 +33,7 @@ export default function MetricChart({
         >
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 0, 0, .1)" />
           <XAxis dataKey="name" />
-          <YAxis className='text-rose-800'/>
+          <YAxis />
           <Tooltip />
           <Line connectNulls type="monotone" dataKey={label} stroke="#164F62" fill="#164F62" strokeWidth={2} />
         </LineChart>
