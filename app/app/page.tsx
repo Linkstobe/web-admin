@@ -1,6 +1,8 @@
 import ProjectSimpleMetrics from "./project-simple-metrics";
 import UserSimpleMetrics from "./user-simple-metrics";
 import ProjectChart from "./project-chart";
+import AccessesPerDay from "./accesses-per-day";
+import AccessesPerHour from "./accesses-per-hour";
 
 export default function Dashboard () {
   return (
@@ -35,6 +37,9 @@ export default function Dashboard () {
         <ProjectSimpleMetrics />
         <ProjectChart />
       </div>
+
+      <AccessesPerDay />
+      <AccessesPerHour />
     </div>
   )
 }
