@@ -14,8 +14,14 @@ export default function ActiveSubscription () {
     const getAllProjects = async () => {
       try {
         const projects = await ProjectService.getAllProject();
+        const validProjects = projects
+          .filter(({ linkstoBe }) => 
+            !linkstoBe.includes("temanovo_") &&
+            !linkstoBe.includes("tema_") &&
+            !linkstoBe.includes("modelos_linkstobe")
+          )
 
-        const roleCounts = projects.reduce((acc, project) => {
+        const roleCounts = validProjects.reduce((acc, project) => {
           const decodedToken: any = project?.role ? jwtDecode(project.role) : {};
           const plan = decodedToken?.role && decodedToken.role.toLowerCase() !== "basic" 
             ? decodedToken.role.toLowerCase() 

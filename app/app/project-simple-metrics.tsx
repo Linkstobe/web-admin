@@ -14,10 +14,16 @@ export default function ProjectSimpleMetrics () {
     const getAllProjects = async () => {
       try {
         const projects = await ProjectService.getAllProject();
+        const validProjects = projects
+          .filter(({ linkstoBe }) => 
+            !linkstoBe.includes("temanovo_") &&
+            !linkstoBe.includes("tema_") &&
+            !linkstoBe.includes("modelos_linkstobe")
+          )
 
-        const totalProjects = projects.length;
+        const totalProjects = validProjects.length;
 
-        const roleCounts = projects.reduce((acc, project) => {
+        const roleCounts = validProjects.reduce((acc, project) => {
           const decodedToken = project?.role ? jwtDecode(project.role) : {};
           // @ts-ignore
           const plan = decodedToken?.role && decodedToken.role.toLowerCase() !== "basic" 
@@ -42,7 +48,7 @@ export default function ProjectSimpleMetrics () {
         });
 
 
-        setAllProjectCount(projects.length)
+        setAllProjectCount(validProjects.length)
         setPlanCount(roleCounts);
       } catch (error) {
         console.error('Erro ao buscar projetos:', error);

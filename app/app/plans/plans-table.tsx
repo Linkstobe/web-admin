@@ -46,9 +46,16 @@ export function PlansTable() {
   
   const getAllProject = async () => {
     const projects = await ProjectService.getAllProject()
+    const validProjects = projects
+      .filter(({ linkstoBe }) => 
+        !linkstoBe.includes("temanovo_") &&
+        !linkstoBe.includes("tema_") &&
+        !linkstoBe.includes("modelos_linkstobe")
+      )
+
     const users = await UserService.getAllUsers()
 
-    const combinedData = projects.map(project => {
+    const combinedData = validProjects.map(project => {
       const user = users.find(user => user.id === project.user_id);
 
       const decodedToken = project?.role ? jwtDecode(project.role) : {};
