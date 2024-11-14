@@ -4,9 +4,10 @@ import MetricChart from "./metric-chart"
 import { MetricsServices } from "@/services/metrics.service"
 import { eachDayOfInterval, format, subDays } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { IMetric } from "@/interfaces/IMetrics"
 
 export default function AccessesPerDay () {
-  const [metrics, setMetrics] = useState([])
+  const [accessesPerDayMetrics, setAccessesPerDayMetrics] = useState([])
 
   useEffect(() => {
     const getAllMetrics = async () => {
@@ -26,10 +27,10 @@ export default function AccessesPerDay () {
           format(new Date(createdAt), 'dd/MM', { locale: ptBR }) === dateString
         ).length
 
-        return { name: dateString, acessos: count } // aqui, alteramos "value" para "acessos"
+        return { name: dateString, acessos: count }
       })
       
-      setMetrics(metricsByDay)
+      setAccessesPerDayMetrics(metricsByDay)
     }
 
     getAllMetrics()
@@ -47,7 +48,7 @@ export default function AccessesPerDay () {
 
       <MetricChart
         label="acessos"
-        data={metrics}
+        data={accessesPerDayMetrics}
       />
     </div>
   )

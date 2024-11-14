@@ -1,17 +1,17 @@
-import { Metric } from "@/interfaces/IMetrics"
+import { IMetric } from "@/interfaces/IMetrics"
 import { Api } from "@/provider"
 
 export const MetricsServices = {
   async onGetAllMetrics () {
-    const { data } = await Api.get<Metric[]>(`/metrics`)
+    const { data } = await Api.get<IMetric[]>(`/metrics`)
     return data
   },
   async onGetMetricById (id: string | number) {
-    const { data } = await Api.get<Metric>(`/metrics/${id}`)
+    const { data } = await Api.get<IMetric>(`/metrics/${id}`)
     return data
   },
   async onGetAllMetricsByProjectId (id: string | number) {
-    const { data } = await Api.get<Metric[]>(`/metrics/project/${id}`)
+    const { data } = await Api.get<IMetric[]>(`/metrics/project/${id}`)
     return data
   }
 }

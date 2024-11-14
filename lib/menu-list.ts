@@ -59,9 +59,9 @@ export function handleGetMenuList(pathname: string): Group[] {
       groupLabel: '',
       menus: [
         {
-          href: "/app/links",
+          href: "/app/link-engagement",
           label: "Engajamento - Links",
-          active: pathname.includes("/links"),
+          active: pathname.includes("/link-engagement"),
           icon: ChartNoAxesCombined,
           subMenus: []
         },

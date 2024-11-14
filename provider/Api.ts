@@ -13,25 +13,32 @@ export async function setBearerToken (token: string) {
   Api.defaults.headers.common["Authorization"] = `Bearer ${token}`
 }
 
-(async () => {
-  try {
-    const token = await StorageHelper.getItem('token');
-    if (token) {
-      setBearerToken(token);
+function getCookie(name: string) {
+  const nameEQ = `${name}=`;
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookies = decodedCookie.split(';');
+  
+  for (let i = 0; i < cookies.length; i++) {
+    let cookie = cookies[i].trim();
+    if (cookie.indexOf(nameEQ) === 0) {
+      return cookie.substring(nameEQ.length, cookie.length);
     }
-  } catch (error) {
-    console.error("Error fetching token from storage", error);
   }
-})();
+  return null;
+}
 
 (async () => {
   try {
-    const { id } = await StorageHelper.getItem("user")
-    if (id) {
-      const { permission } = await UserService.getUserById(id)
-      usePermission.getState().setPermission(permission)
+    const token = getCookie('authToken');
+    if (token) {
+      setBearerToken(token);
+    }
+
+    const permission = getCookie('permission');
+    if (permission) {
+      usePermission.getState().setPermission(permission);
     }
   } catch (error) {
-    console.log(error)
+    console.error("Erro ao buscar token ou permissão do cookie", error);
   }
-})()
+})();

@@ -14,7 +14,7 @@ export default function TableTopButton ({
   return (
     <button
       {...rest}
-      className={cn(className, "bg-[#164F62] p-2 rounded-lg")}
+      className={cn("bg-[#164F62] p-2 rounded-lg", className)}
     >
       { <Icon /> }
     </button>

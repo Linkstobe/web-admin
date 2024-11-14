@@ -26,9 +26,6 @@ export default function ProjectChart () {
       const proPlanSubscriptions = planSubscriptions.filter(transaction => transaction.amount === "1499" || transaction.amount === "14390");
       const premiumPlanSubscriptions = planSubscriptions.filter(transaction => transaction.amount === "4999" || transaction.amount === "47990");
 
-      console.log({ freeSubscriptions });
-      
-
       const incrementMonth = (date, planType) => {
         const monthIndex = new Date(date).getMonth();
         if (months[monthIndex]) {

@@ -1,4 +1,4 @@
-export interface Metric {
+export interface IMetric {
   id: number
   user_id: number
   system: string

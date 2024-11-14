@@ -3,9 +3,10 @@ import { useEffect, useState } from "react"
 import MetricChart from "./metric-chart"
 import { MetricsServices } from "@/services/metrics.service"
 import { subDays } from "date-fns"
+import { IMetric } from "@/interfaces/IMetrics"
 
 export default function AccessesPerHour () {
-  const [metrics, setMetrics] = useState([])
+  const [accessesPerHourMetrics, setAccessesPerHourMetrics] = useState([])
 
   useEffect(() => {
     const getAllMetrics = async () => {
@@ -25,7 +26,7 @@ export default function AccessesPerHour () {
         hourlyAccesses[hour].acessos += 1
       })
 
-      setMetrics(hourlyAccesses)
+      setAccessesPerHourMetrics(hourlyAccesses)
     }
 
     getAllMetrics()
@@ -36,7 +37,7 @@ export default function AccessesPerHour () {
       <h2 className="p-4 text-2xl font-bold tracking-tight text-[#164F62]">
         Acessos por hora
       </h2>
-      <MetricChart label="acessos" data={metrics} />
+      <MetricChart label="acessos" data={accessesPerHourMetrics} />
     </div>
   )
 }

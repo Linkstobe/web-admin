@@ -10,23 +10,25 @@ export default function useAuth () {
       const res = await AuthService.login(payload);
       delete res.user.password;
       
-      const userUnauthorized = !res.user.permission
+      const userUnauthorized = !res.user.permission;
       
       if (userUnauthorized) {
-        throw new Error("Erro ao tentar fazer login")
+        throw new Error("Erro ao tentar fazer login");
       }
 
-      usePermission.getState().setPermission(res.user.permission)
+      usePermission.getState().setPermission(res.user.permission);
       
       await StorageHelper.setItem("user", res.user);
-      await StorageHelper.setItem("token", res.token)
+      await StorageHelper.setItem("token", res.token);
       await setBearerToken(res.token);
+
       document.cookie = `authToken=${res.token}; path=/; max-age=86400`;
+      document.cookie = `permission=${res.user.permission}; path=/; max-age=86400`;
     } catch (error) {
       console.log(error);
       throw new Error("Email ou senha errada");
     }
   }
 
-  return onAuth
+  return onAuth;
 }
