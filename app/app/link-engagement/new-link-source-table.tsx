@@ -98,7 +98,7 @@ export default function NewLinkSourceTable() {
   return (
     <Table.Root>
       <Table.TopSection>
-        <Table.Title title="Origem de Novos Links" />
+        <Table.Title title="Origem de Novos Projetos" />
         <Table.Search placeholder="Buscar" onChange={onFilterMetric} />
       </Table.TopSection>
 
@@ -110,7 +110,7 @@ export default function NewLinkSourceTable() {
               <Table.HeaderItem title="Posição" />
               <Table.HeaderItem title="Nome do usuário" />
               <Table.HeaderItem title="Link do usuário" />
-              <Table.HeaderItem title="Novos Links" />
+              <Table.HeaderItem title="Novos Projetos" />
               <Table.HeaderItem title="" />
             </Table.Row>
           </Table.HeaderSection>
