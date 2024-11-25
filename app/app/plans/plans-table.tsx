@@ -240,7 +240,7 @@ export function PlansTable() {
                         className="w-full text-start justify-start rounded-none text-[#767676]"
                       >
                         <Link
-                          href={"https://app.linksto.be/designer/panels/" + project_id}
+                          href={"https://app.linksto.be/panels/" + project_id}
                           target="_blank"
                         >
                           Personalizar projeto
