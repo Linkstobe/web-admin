@@ -124,6 +124,7 @@ export default function PanelMetricsTable () {
                 <Table.BodyItem>
                   <Link
                     href={"https://linksto.be/" + project}
+                    target="_blank"
                     className="underline text-[#164F62] font-semibold"
                   >
                     { project }

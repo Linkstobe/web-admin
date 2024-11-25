@@ -103,7 +103,7 @@ export default async function Dashboard () {
       </div>
 */}
 
-      {/* <div
+      <div
         className="flex flex-col gap-4"
       >
         <Separator />
@@ -113,7 +113,7 @@ export default async function Dashboard () {
           Métricas de painéis
         </h4>
         <PanelMetricsTable />
-      </div>  */}
+      </div> 
     </div>
   )
 }
