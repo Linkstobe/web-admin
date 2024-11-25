@@ -40,6 +40,7 @@ export default function ManagePermissionModal ({
 
   const onSubmit = async (values: z.infer<typeof managePermissionSchema>) => {
     try {
+      
       const {
         permission
       } = values
@@ -55,7 +56,7 @@ export default function ManagePermissionModal ({
       }
 
       await UserService.updateUserById(userId, {
-        permission: permission === "Sem permissões" ? "" : (permission !== "Somente ver" ? "editar" : "ver")
+        permission: permission === "Sem permissões" ? "" : permission
       })
 
       toast({
@@ -111,8 +112,9 @@ export default function ManagePermissionModal ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="Sem permissões">Sem permissões</SelectItem>
-                          <SelectItem value="Somente ver">Somente ver</SelectItem>
+                          <SelectItem value="ver">Somente ver</SelectItem>
                           <SelectItem value="editar">Ver e editar</SelectItem>
+                          <SelectItem value="personalizar">Somente personalizar</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormItem>

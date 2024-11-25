@@ -1,13 +1,18 @@
 import { 
   ChartNoAxesCombined, 
+  ClipboardList, 
   Crown, 
+  FileTextIcon, 
   LayoutDashboard, 
+  Lock, 
   LucideIcon, 
   PanelTop, 
   Server, 
+  ShoppingCart, 
   TicketSlash, 
+  TriangleAlert, 
   User, 
-  UserPlus
+  UserPlus,
 } from "lucide-react"
 
 type Submenu = {
@@ -56,13 +61,34 @@ export function handleGetMenuList(pathname: string): Group[] {
       ]
     },
     {
-      groupLabel: '',
+      groupLabel: 'Métricas',
       menus: [
         {
           href: "/app/link-engagement",
           label: "Engajamento - Links",
           active: pathname.includes("/link-engagement"),
           icon: ChartNoAxesCombined,
+          subMenus: []
+        },
+        {
+          href: "/app/reports",
+          label: "Relatórios",
+          active: pathname.includes("/app/reports"),
+          icon: FileTextIcon,
+          subMenus: []
+        },
+        {
+          href: "/app/forms",
+          label: "Formulários",
+          active: pathname.includes("/app/forms"),
+          icon: ClipboardList,
+          subMenus: []
+        },
+        {
+          href: "/app/products",
+          label: "Produtos",
+          active: pathname.includes("/app/products"),
+          icon: ShoppingCart,
           subMenus: []
         },
       ]
@@ -101,6 +127,25 @@ export function handleGetMenuList(pathname: string): Group[] {
           label: "Botões",
           active: pathname.includes("/buttons"),
           icon: Server,
+          subMenus: []
+        },
+      ]
+    },
+    {
+      groupLabel: 'Denúncias',
+      menus: [
+        {
+          href: "/app/reported-projects",
+          label: "Projetos Denunciados",
+          active: pathname.includes("/app/reported-projects"),
+          icon: TriangleAlert,
+          subMenus: []
+        },
+        {
+          href: "/app/locks",
+          label: "Bloqueios",
+          active: pathname.includes("/app/locks"),
+          icon: Lock,
           subMenus: []
         },
       ]

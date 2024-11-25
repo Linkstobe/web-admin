@@ -1,4 +1,4 @@
-import { IPainel } from "@/interfaces/IPanels";
+import { ICreatePanel, IPainel } from "@/interfaces/IPanels";
 import { Api } from "@/provider/Api";
 
 export const PainelService = {

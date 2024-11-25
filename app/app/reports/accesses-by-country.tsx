@@ -40,7 +40,7 @@ export default function AccessesByCountry () {
 
       const formattedMetrics = Object.entries(locationCount)
         .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value)
+        .sort((a: any, b: any) => b.value - a.value)
 
       setCountryAccessMetrics(formattedMetrics)
     }

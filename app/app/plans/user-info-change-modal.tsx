@@ -181,7 +181,7 @@ export default function UserInfoChangeModal ({
                           <FormLabel>Link do usuário</FormLabel>
                           <FormControl>
                             <div
-                              className="gap-0 items-center flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-1 focus-within:ring-ring disabled:cursor-not-allowed disabled:opacity-50 focus-within:ring-1"
+                              className="gap-0 items-center flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-within:outline-none focus-within:ring-ring disabled:cursor-not-allowed disabled:opacity-50 focus-within:ring-1"
                             >
                               <span
                                 className="text-[#525151] text-base"

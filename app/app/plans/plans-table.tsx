@@ -18,6 +18,7 @@ import Stack from '@mui/material/Stack';
 import { useToast } from "@/hooks/use-toast"
 import { usePermission } from "@/hook/use-permission"
 import ConfirmationModal from "@/components/confirmation-modal"
+import Link from "next/link"
 
 export function PlansTable() {
   const { toast } = useToast()
@@ -212,7 +213,7 @@ export function PlansTable() {
                       <ConfirmationModal
                         onConfirm={() => handleDeleteProject(project_id)}
                         title="Confirmação de exclusão do projeto"
-                        description="Você está preste a deletar esse projeto. Isso implica na sua exclusão e todos os seus itens. Deseja excluir projeto?"
+                        description="Você está prestes a deletar esse projeto. Isso implica na sua exclusão e todos os seus itens. Deseja excluir projeto?"
                       >
                         <Button
                           variant="outline"
@@ -221,6 +222,30 @@ export function PlansTable() {
                           Excluir projeto
                         </Button>
                       </ConfirmationModal>
+                      
+                      <ConfirmationModal
+                        onConfirm={() => {}}
+                        title="Confirmação de bloqueio do projeto"
+                        description="Você está prestes a bloquear esse projeto. O projeto passará a não ser mais visível, e não poderá realizar ações. Deseja excluir projeto?"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full text-start justify-start rounded-none text-[#767676]"
+                        >
+                          Bloquear Projeto
+                        </Button>
+                      </ConfirmationModal>
+                      <Button
+                        variant="outline"
+                        className="w-full text-start justify-start rounded-none text-[#767676]"
+                      >
+                        <Link
+                          href={"https://app.linksto.be/designer/panels/" + project_id}
+                          target="_blank"
+                        >
+                          Personalizar projeto
+                        </Link>
+                      </Button>
                     </PopoverContent>
                   </Popover>
                 </Table.BodyItem>

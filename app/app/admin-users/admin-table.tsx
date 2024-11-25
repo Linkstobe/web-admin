@@ -16,6 +16,12 @@ export default function AdminTable () {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  const formatedPermission = {
+    "ver": "Somente ver",
+    "editar": "Ver e editar",
+    "personalizar": "Somente personalizar"
+  }
+
   const onFilterProject = (value: string) => {
     if (value.trim() === "") { 
       setFilteredAllAdmins(allAdmins) 
@@ -49,7 +55,6 @@ export default function AdminTable () {
         const admins = users.filter(({ permission }) => permission)
         setAllAdmins(admins)
         setFilteredAllAdmins(admins)
-        console.log({ admins });
       } catch (error) {
         console.log(error);
       }
@@ -99,7 +104,7 @@ export default function AdminTable () {
                   text={email}
                 />
                 <Table.BodyItem 
-                  text={permission === "ver" ? "Somente ver" : "Ver e editar"}
+                  text={formatedPermission[permission]}
                 />
                 <Table.BodyItem>
                   <ManagePermissionModal

@@ -22,7 +22,7 @@ export default function FormMetricsTable () {
   const [currentPage, setCurrentPage] = useState<number>(1)
   const formsPerPage: number = 10
 
-  const  paginatedForms: TableFormMetric[] = filteredFormMetrics.slice(
+  const paginatedForms: TableFormMetric[] = filteredFormMetrics.slice(
     (currentPage - 1) * formsPerPage,
     currentPage * formsPerPage,
   )

@@ -15,6 +15,7 @@ export interface IProject {
   createdAt: string;
   arquived: boolean;
   role?: string
+  referral_id: string
 }
 
 export interface IUpdateProject extends Partial<IProject> {}

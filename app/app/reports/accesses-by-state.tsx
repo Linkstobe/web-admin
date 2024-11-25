@@ -42,6 +42,7 @@ export default function AccessesByState () {
 
       const formattedCountryMetrics = Object.entries(locationCountByCountry).map(([name, statesSet]) => ({
         name,
+        // @ts-ignore
         value: statesSet.size
       }))
       setCountryAccessMetrics(formattedCountryMetrics)

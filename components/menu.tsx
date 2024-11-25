@@ -31,100 +31,6 @@ export default function Menu ({
   if(!sidebar) return null
 
   return (
-    // <nav
-    // >
-    //   <ul
-    //     className="flex flex-col w-full items-start"
-    //   >
-    //     {
-    //       menus.map(({ groupLabel, menus }, index) => (
-    //         <li
-    //           key={index}
-    //           className={cn('w-full', groupLabel ? 'pt-5' : '')} 
-    //         >
-    //           <p className="text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
-    //             {groupLabel}
-    //           </p>
-
-    //           {
-    //             menus.map(({ href, label, active, icon: Icon, subMenus }, index) => (
-    //               <div
-    //                 className="w-full"
-    //                 key={index}
-    //               >
-    //                 <Button
-    //                   variant={active ? 'secondary' : 'ghost'}
-    //                   className="w-full justify-start h-10 mb-1 p-0 hover:bg-accent"
-    //                   asChild
-    //                 >
-    //                   <Link href={href}>
-    //                     <span
-    //                       className={cn(
-    //                         false ? '' : 'mr-4',
-    //                         'p-2 bg-zinc-100 rounded-lg shadow-md',
-    //                         active ? 'bg-cyan-900' : '',
-    //                       )}
-    //                     >
-    //                       <Icon
-    //                         size={20}
-    //                         color={active ? 'white' : 'black'}
-    //                       />
-    //                     </span>
-    //                     <p
-    //                       className={cn(
-    //                         'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
-    //                       )}
-    //                     >
-    //                       {label}
-    //                     </p>
-    //                   </Link>
-    //                 </Button>
-    //               </div>
-    //             ))
-    //           }
-    //         </li>
-    //       ))
-    //     }
-
-    //     <li
-    //       className={cn('w-full pt-5')}
-    //     >
-    //         <p className="text-sm font-medium text-muted-foreground px-4 pb-2 max-w-[248px] truncate">
-    //           Ações
-    //         </p>
-    //       <div
-    //         className="w-full"
-    //       >
-    //         <Button
-    //           variant={'ghost'}
-    //           className="w-full justify-start h-10 mb-1 p-0 hover:bg-accent"
-    //           asChild
-    //         >
-    //           <Link href="/">
-    //             <span
-    //               className={cn(
-    //                 false ? '' : 'mr-4',
-    //                 'p-2 bg-zinc-100 rounded-lg shadow-md',
-    //               )}
-    //             >
-    //               <LogOut
-    //                 size={20}
-    //               />
-    //             </span>
-    //             <p
-    //               className={cn(
-    //                 'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
-    //               )}
-    //             >
-    //               Sair
-    //             </p>
-    //           </Link>
-    //         </Button>
-    //       </div>
-    //     </li>
-    //   </ul>
-
-    // </nav>
 
     <nav className="mt-8 w-full">
       <div className="w-full flex flex-colitems-start space-y-1 px-2 justify-between">
@@ -170,7 +76,7 @@ export default function Menu ({
                                 <Link href={href}>
                                   <span
                                     className={cn(
-                                      isOpen ? 'mr-4' : 'ml-2',
+                                      isOpen ? 'mr-4' : 'ml-0.5',
                                       'p-2 bg-zinc-100 rounded-lg shadow-md',
                                       active ? 'bg-cyan-900' : '',
                                     )}
@@ -181,14 +87,18 @@ export default function Menu ({
                                     />
                                   </span>
 
-                                  <p
-                                    className={cn(
-                                      !isOpen ? 'ml-4' : '',
-                                      'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
-                                    )}
-                                  >
-                                    {label}
-                                  </p>
+                                  {
+                                    isOpen &&
+                                    <p
+                                      className={cn(
+                                        !isOpen ? 'ml-4' : '',
+                                        'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
+                                      )}
+                                    >
+                                      {label}
+                                    </p>
+                                  }
+
                                 </Link>
                               </Button>
                             </TooltipTrigger>
@@ -255,7 +165,7 @@ export default function Menu ({
                       <Link href="/">
                         <span
                           className={cn(
-                            isOpen ? 'mr-4' : 'ml-2',
+                            isOpen ? 'mr-4' : 'ml-0.5',
                             'p-2 bg-zinc-100 rounded-lg shadow-md',
                           )}
                         >
@@ -263,14 +173,18 @@ export default function Menu ({
                             size={20}
                           />
                         </span>
-                        <p
-                          className={cn(
-                            !isOpen ? 'ml-4' : '',
-                            'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
-                          )}
-                        >
-                          Sair
-                        </p>
+
+                        {
+                          isOpen &&
+                          <p
+                            className={cn(
+                              !isOpen ? 'ml-4' : '',
+                              'max-w-[200px] truncate translate-x-0 opacity-100 font-medium'
+                            )}
+                          >
+                            Sair
+                          </p>
+                        }
                       </Link>
                     </Button>
                   </TooltipTrigger>
@@ -285,6 +199,7 @@ export default function Menu ({
           </li>
         </ul>
       </div>
+      
     </nav>
   )
 }

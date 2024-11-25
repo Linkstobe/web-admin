@@ -5,8 +5,8 @@ import { MetricsServices } from "@/services/metrics.service"
 import { subDays } from "date-fns"
 import { IMetric } from "@/interfaces/IMetrics"
 
-export default function AccessesPerHour () {
-  const [accessesPerHourMetrics, setAccessesPerHourMetrics] = useState([])
+export default function AccessesPerHour() {
+  const [metricsPerHour, setMetricsPerHour] = useState([])
 
   useEffect(() => {
     const getAllMetrics = async () => {
@@ -16,17 +16,28 @@ export default function AccessesPerHour () {
         new Date(createdAt) >= subDays(new Date(), 90)
       )
 
-      const hourlyAccesses = Array.from({ length: 24 }, (_, i) => ({
+      const clicksMetrics = allMetrics.filter(({ link_type, createdAt }) =>
+        link_type.startsWith("click:") &&
+        new Date(createdAt) >= subDays(new Date(), 90)
+      )
+
+      const hourlyMetrics = Array.from({ length: 24 }, (_, i) => ({
         name: `${i}h`,
         acessos: 0,
+        cliques: 0,
       }))
 
       accessMetrics.forEach(({ createdAt }) => {
         const hour = new Date(createdAt).getHours()
-        hourlyAccesses[hour].acessos += 1
+        hourlyMetrics[hour].acessos += 1
       })
 
-      setAccessesPerHourMetrics(hourlyAccesses)
+      clicksMetrics.forEach(({ createdAt }) => {
+        const hour = new Date(createdAt).getHours()
+        hourlyMetrics[hour].cliques += 1
+      })
+
+      setMetricsPerHour(hourlyMetrics)
     }
 
     getAllMetrics()
@@ -35,9 +46,13 @@ export default function AccessesPerHour () {
   return (
     <div className="w-full bg-white rounded-lg">
       <h2 className="p-4 text-2xl font-bold tracking-tight text-[#164F62]">
-        Acessos por hora
+        Acessos e cliques por hora
       </h2>
-      <MetricChart label="acessos" data={accessesPerHourMetrics} />
+      <MetricChart 
+        label="acessos" 
+        data={metricsPerHour}
+        secondLabel="cliques"
+      />
     </div>
   )
 }

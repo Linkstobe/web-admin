@@ -48,7 +48,7 @@ export default function CreateAdminUserForm () {
       })
       .min(8, "A senha deve ter no mínimo 8 caracteres")
       .optional(),
-    permissions: z
+    permission: z
       .string({
         required_error: "Escolher uma permissão é obrigatório",
       })
@@ -100,14 +100,20 @@ export default function CreateAdminUserForm () {
       name: "",
       email: "",
       password: "",
-      permissions: "Somente ver",
+      permission: "Somente ver",
       selectedUser: "",
     }
   })
 
   const onSubmit = async (values: z.infer<typeof createAdminUserSchema>) => {
     try {
-      const { name, email, password, permissions, userCreationType, selectedUser } = values;
+      const permissionTag = {
+        "Somente ver": "ver",
+        "Ver e editar": "editar",
+        "Somente personalizar": "personalizar"
+      }
+
+      const { name, email, password, permission, userCreationType, selectedUser } = values;
       const existingUser = userCreationType === "Usuário já existente";
 
       const userCanEdit = canEdit()
@@ -125,7 +131,7 @@ export default function CreateAdminUserForm () {
       if (existingUser) {
         console.log("Updating existing user...");
         await UserService.updateUserById(selectedUser, {
-          permission: permissions !== "Somente ver" ? "editar" : "ver",
+          permission,
         });
       } else {
         console.log("Creating new user...");
@@ -134,7 +140,7 @@ export default function CreateAdminUserForm () {
           email,
           password,
           cellphone: "00",
-          permission: permissions !== "Somente ver" ? "editar" : "ver",
+          permission,
           profile_photo: "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp",
         });
       }
@@ -161,7 +167,6 @@ export default function CreateAdminUserForm () {
       try {
         const users = await UserService.getAllUsers()
         setUsersToSelect(users)
-        console.log({ users });
       } catch (error) {
         console.log(error)
       } 
@@ -355,7 +360,7 @@ export default function CreateAdminUserForm () {
           <div>
             <FormField 
               control={createAdminUserForm.control}
-              name="permissions"
+              name="permission"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
@@ -373,8 +378,9 @@ export default function CreateAdminUserForm () {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Somente ver">Somente ver</SelectItem>
+                      <SelectItem value="ver">Somente ver</SelectItem>
                       <SelectItem value="editar">Ver e editar</SelectItem>
+                      <SelectItem value="personalizar">Somente personalizar</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>

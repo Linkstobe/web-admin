@@ -2,6 +2,7 @@
 import { LucideIcon } from "lucide-react";
 import { ButtonHTMLAttributes } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface TableBasicActionProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   icon: LucideIcon;
@@ -11,6 +12,7 @@ interface TableBasicActionProps extends ButtonHTMLAttributes<HTMLButtonElement> 
 export default function TableBasicAction({
   icon: Icon,
   tooltipText,
+  className,
   ...rest
 }: TableBasicActionProps) {
   return (
@@ -20,12 +22,17 @@ export default function TableBasicAction({
           <TooltipTrigger asChild>
             <button 
               {...rest}
-              className="flex items-center"
+              className={cn(
+                "flex items-center",
+                className
+              )}
             >
               <Icon />
             </button>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent
+            className=""
+          >
             {tooltipText}
           </TooltipContent>
         </Tooltip>

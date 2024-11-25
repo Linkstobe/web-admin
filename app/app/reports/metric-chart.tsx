@@ -9,11 +9,13 @@ interface MetricChartData {
 interface MetricChartProps {
   label: string
   data: MetricChartData[]
+  secondLabel?: string
 }
 
 export default function MetricChart({
   label,
-  data
+  data,
+  secondLabel
 }: MetricChartProps) {
   return (
     <div 
@@ -35,7 +37,25 @@ export default function MetricChart({
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Line connectNulls type="monotone" dataKey={label} stroke="#164F62" fill="#164F62" strokeWidth={2} />
+          <Line 
+            connectNulls 
+            type="monotone" 
+            dataKey={label} 
+            stroke="#164F62" 
+            fill="#164F62" 
+            strokeWidth={2} 
+          />
+
+          {secondLabel && (
+            <Line 
+              connectNulls 
+              type="monotone" 
+              dataKey={secondLabel} 
+              stroke="#F24F00" 
+              fill="#F24F00" 
+              strokeWidth={2} 
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>

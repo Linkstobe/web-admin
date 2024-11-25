@@ -5,15 +5,20 @@ import { MetricsServices } from "@/services/metrics.service";
 import { useEffect, useState } from "react"
 
 export default function AccessesByOperatingSystem () {
-  const [operatingSystemAccessMetrics, setOperatingSystemAccessMetrics] = useState([]);
+  const [operatingSystemAccessMetrics, setOperatingSystemAccessMetrics] = useState<IMetric []>([]);
 
   useEffect(() => {
     const getOperatingSystemMetrics = async () => {
       const allMetrics = await MetricsServices.onGetAllMetrics()
-      const accessMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("origin:"))
+      const accessMetrics = allMetrics
+        .filter(({ link_type }) => link_type.startsWith("origin:"))
+        .map((metric) => ({
+          ...metric,
+          system:  metric.system ?? "Unknown OS" 
+        }))
       
       const systemCounts = accessMetrics.reduce((acc, { system }) => {
-        const found = acc.find((item) => item.name === system);
+        const found = acc.find((item) => item.name.toLowerCase() === system.toLowerCase());
         if (found) {
           found.value += 1;
         } else {
@@ -42,6 +47,7 @@ export default function AccessesByOperatingSystem () {
         label="Acessos"
         backgroundColor={["#FF6347", "#4682B4", "#1E90FF", "#A9A9A9", "#87CEFA", "#32CD32"]}
         hoverBackgroundColor={["#E5533B", "#357AB9", "#1C7AC0", "#8C8C8C", "#6BAED7", "#28A428"]}
+        //@ts-ignore
         metrics={operatingSystemAccessMetrics}
       />
     </div>
