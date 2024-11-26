@@ -235,17 +235,19 @@ export function PlansTable() {
                           Bloquear Projeto
                         </Button>
                       </ConfirmationModal>
-                      <Button
-                        variant="outline"
-                        className="w-full text-start justify-start rounded-none text-[#767676]"
-                      >
+
+                      
                         <Link
                           href={"https://app.linksto.be/panels/" + project_id}
                           target="_blank"
                         >
-                          Personalizar projeto
+                          <Button
+                            variant="outline"
+                            className="w-full text-start justify-start rounded-none text-[#767676]"
+                          >
+                            Personalizar projeto
+                          </Button>
                         </Link>
-                      </Button>
                     </PopoverContent>
                   </Popover>
                 </Table.BodyItem>

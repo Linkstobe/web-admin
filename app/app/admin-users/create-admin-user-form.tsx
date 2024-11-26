@@ -100,7 +100,7 @@ export default function CreateAdminUserForm () {
       name: "",
       email: "",
       password: "",
-      permission: "Somente ver",
+      permission: "ver",
       selectedUser: "",
     }
   })
@@ -357,7 +357,9 @@ export default function CreateAdminUserForm () {
             )
           }
 
-          <div>
+          <div
+            className="flex flex-col gap-2"
+          >
             <FormField 
               control={createAdminUserForm.control}
               name="permission"
@@ -378,14 +380,36 @@ export default function CreateAdminUserForm () {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="ver">Somente ver</SelectItem>
-                      <SelectItem value="editar">Ver e editar</SelectItem>
-                      <SelectItem value="personalizar">Somente personalizar</SelectItem>
+                      <SelectItem value="ver">
+                        Somente ver
+                      </SelectItem>
+                      <SelectItem value="editar">
+                        Ver e editar
+                      </SelectItem>
+                      <SelectItem value="personalizar">
+                        Somente personalizar
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
+
+            <ul className="flex flex-col gap-2">
+              <li className="text-sm">
+                <span className="font-semibold text-sm">Ver e Editar: </span>
+                O usuário terá acesso completo à tela de gestão, podendo visualizar métricas e editar itens. Também será possível personalizar projetos por meio da plataforma Linksto.be.
+              </li>
+              <li className="text-sm">
+                <span className="font-semibold text-sm">Somente Ver: </span>
+                O usuário poderá acessar a tela de gestão e visualizar todas as métricas, mas não terá permissão para editá-las.
+              </li>
+              <li className="text-sm">
+                <span className="font-semibold text-sm">Somente Personalizar: </span>
+                O usuário poderá personalizar projetos existentes pela plataforma da Linksto.be. Na tela de gestão, terá acesso apenas à página de projetos, com a possibilidade de ser redirecionado para editar um projeto.
+              </li>
+            </ul>
+
           </div>
 
           <div
