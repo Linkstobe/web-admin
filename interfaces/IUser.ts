@@ -10,7 +10,8 @@ export interface IUser {
   projects: [];
   createdAt: string;
   updatedAt: string;
-  permission: string
+  permission: string;
+  blocked: boolean;
 }
 
 export interface ICreateUser {
@@ -21,6 +22,7 @@ export interface ICreateUser {
   cellphone: string;
   profile_photo: string;
   permission: string;
+  blocked: boolean;
 }
 
 export interface IUploadUser extends Partial<IUser> {}

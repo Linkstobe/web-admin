@@ -3,6 +3,8 @@ import ConfirmationModal from "@/components/confirmation-modal";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { usePermission } from "@/hook/use-permission";
+import { useToast } from "@/hooks/use-toast";
 import { IProject } from "@/interfaces/IProjects";
 import { IUser } from "@/interfaces/IUser";
 import { cn } from "@/lib/utils";
@@ -24,6 +26,9 @@ type TableMetrics = {
 }
 
 export default function UsersTable () {
+  const { toast } = useToast()
+  const { canEdit } = usePermission()
+
   const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>([])
   const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
 
@@ -63,29 +68,94 @@ export default function UsersTable () {
     "premium": "bg-[#299FC7]",
   }
 
-  useEffect(() => {
-    const getAllUsers = async () => {
-      const users: IUser[] = await UserService.getAllUsers()
-      const projects: IProject[] = await ProjectService.getAllProject()      
+  const onGetAllUsers = async () => {
+    const users: IUser[] = await UserService.getAllUsers()
+    const projects: IProject[] = await ProjectService.getAllProject()      
 
-      const tableValues: TableMetrics[] = users.map(user => {
-        const userProjects = projects.filter(project => project.user_id === user.id);
+    const tableValues: TableMetrics[] = users.map(user => {
+      const userProjects = projects.filter(project => project.user_id === user.id);
 
-        return {
-          name: user.name,
-          email: user.email,
-          cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
-          status: "Ativo",
-          userProjects,
-          projectCount: userProjects.length
-        }
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
+        status: user.blocked ? "Bloqueado" : "Ativo",
+        userProjects,
+        projectCount: userProjects.length
+      }
+    })
+
+    setTableMetrics(tableValues)
+    setFilteredTableMetrics(tableValues)
+  }
+
+  const onDeleteUser = async (id: string | number) => {
+    try {
+      const userCanEdit = canEdit()
+
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir usuário",
+          description: "Você não possui permissão para excluir o usuário. Entre em contato com o administrador.",
+        })
+        return
+      }
+
+      await UserService.deleteUserById(id)
+      toast({
+        variant: "success",
+        title: "Usuário excluído!",
+        description: "O usuário foi excluído com sucesso.",
       })
 
-      setTableMetrics(tableValues)
-      setFilteredTableMetrics(tableValues)
+      await onGetAllUsers()
+    } catch (error) {
+      console.log("UsersTable: ", error)
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir usuário",
+        description: "Ocorreu um erro ao excluir usuário. Tente novamente.",
+      })
     }
+  }
 
-    getAllUsers()
+  const onBlockUser = async (id: string | number) => {
+    try {
+      const userCanEdit = canEdit()
+
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir usuário",
+          description: "Você não possui permissão para bloquear o usuário. Entre em contato com o administrador.",
+        })
+        return
+      }
+
+      await UserService.updateUserById(id, {
+        blocked: true
+      })
+      toast({
+        variant: "success",
+        title: "Usuário bloqueado!",
+        description: "O usuário foi bloqueado com sucesso.",
+      })
+
+      await onGetAllUsers()
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao bloquear usuário",
+        description: "Ocorreu um erro ao bloquear usuário. Tente novamente.",
+      })
+    }
+  
+  }
+
+  useEffect(() => {
+    onGetAllUsers()
   }, [])
 
   return (
@@ -115,7 +185,7 @@ export default function UsersTable () {
 
         <Table.BodySection>
           {
-            paginatedMetrics.map(({ name, email, cellphone, projectCount, userProjects, status }, index) => (
+            paginatedMetrics.map(({ id, name, email, cellphone, projectCount, userProjects, status }, index) => (
               <Table.Row
                 key={index}
               >
@@ -186,7 +256,7 @@ export default function UsersTable () {
                       <ConfirmationModal
                         title="Confirmação de exclusão do usuário"
                         description="Você está prestes a excluir esse usuário. Isso implica na exclusão do usuário e de todos os seus itens. Deseja excluir usuário?"
-                        onConfirm={() => {}}
+                        onConfirm={() => onDeleteUser(id)}
                       >
                         <Button
                           variant="outline"
@@ -198,7 +268,7 @@ export default function UsersTable () {
                       <ConfirmationModal
                         title="Confirmação de bloqueio do usuário"
                         description="Você está prestes a bloquear esse usuário. O usuário perderá acesso à conta e seus projetos passarão a não estar mais ativos. Deseja bloquear usuário?"
-                        onConfirm={() => {}}
+                        onConfirm={() => onBlockUser(id)}
                       >
                         <Button
                           variant="outline"
