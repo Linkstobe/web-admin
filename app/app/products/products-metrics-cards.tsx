@@ -1,9 +1,17 @@
 'use client'
 import { AnalyticsSimpleCard } from "@/components/analytics-simple-card";
+import { IMetric } from "@/interfaces/IMetrics";
+import { ITransaction } from "@/interfaces/ITransactions";
 import { MetricsServices } from "@/services/metrics.service";
 import { TransactionService } from "@/services/transactions.service";
 import { DollarSign, MousePointerClick, User } from "lucide-react";
 import { useEffect, useState } from "react";
+
+interface ProductsMetricsCardsProps {
+  transactions: ITransaction[]
+  productAccessMetrics: IMetric[]
+  productClicksMetrics: IMetric[]
+}
 
 type ProductMetrics = {
   totalAccesses: number
@@ -12,7 +20,11 @@ type ProductMetrics = {
   invoicing: number
 }
 
-export default function ProductsMetricsCards () {
+export default function ProductsMetricsCards ({
+  productAccessMetrics,
+  productClicksMetrics,
+  transactions
+}: ProductsMetricsCardsProps) {
   const [productsMetrics, setProductsMetrics] = useState<ProductMetrics>({
     totalAccesses: 0,
     totalClicks: 0,
@@ -22,19 +34,11 @@ export default function ProductsMetricsCards () {
   
   useEffect(() => {
     const getAllProductsMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const allTransactions = await TransactionService.onGetAllTransactions()
-      
-      const accessesMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("view:product"))
-      const clicksMetrics = allMetrics.filter(({ link_type }) => (
-        link_type.startsWith("click:panel-Carrossel") ||
-        link_type.startsWith("click:panel-Galeria") ||
-        link_type.startsWith("click:panel-Bloco")
-      ))
-      const productTransactions = allTransactions.filter(({ productId }) => productId && !isNaN(productId))
 
-      const totalClicks = clicksMetrics.length
-      const totalAccesses = accessesMetrics.length
+      const productTransactions = transactions.filter(({ productId }) => productId && !isNaN(productId))
+
+      const totalClicks = productClicksMetrics.length
+      const totalAccesses = productAccessMetrics.length
       const newSales = productTransactions.length
       let invoicing = 0
 
@@ -53,7 +57,7 @@ export default function ProductsMetricsCards () {
     }
 
     getAllProductsMetrics()
-  }, [])
+  }, [productAccessMetrics, productClicksMetrics, transactions])
 
   return (
     <div

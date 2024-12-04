@@ -13,13 +13,21 @@ import { Button } from "@/components/ui/button"
 import { jwtDecode } from "jwt-decode"
 import { cn } from "@/lib/utils"
 
+interface NewLinkSourceTableProps {
+  projects: IProject[]
+  users: IUser[]
+}
+
 type TableMetrics = {
   linkstoBe: string
   newLinks: IProject[]
   userName: string
 }
 
-export default function NewLinkSourceTable() {
+export default function NewLinkSourceTable({
+  projects,
+  users
+}: NewLinkSourceTableProps) {
   const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>([])
   const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
 
@@ -56,20 +64,18 @@ export default function NewLinkSourceTable() {
 
   useEffect(() => {
     const getNewProjectMetrics = async () => {
-      const allProjects: IProject[] = await ProjectService.getAllProject()
-      const validProjects = allProjects.filter(({ linkstoBe }) => 
+      const validProjects = projects.filter(({ linkstoBe }) => 
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe")
       )
-      const allUsers: IUser[] = await UserService.getAllUsers()
 
       const projectMetrics: TableMetrics[] = validProjects.map((project) => {
         const relatedProjects = validProjects.filter(
           (p) => Number(p.referral_id) === Number(project.id)
         )
 
-        const user = allUsers.find((u) => Number(u.id) === Number(project.user_id))
+        const user = users.find((u) => Number(u.id) === Number(project.user_id))
 
         return {
           linkstoBe: project.linkstoBe,

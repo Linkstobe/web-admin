@@ -9,8 +9,13 @@ import { MetricsServices } from "@/services/metrics.service"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useEffect, useState } from "react"
 
+interface AccessesByStateProps {
+  locationMetrics: IMetric[]
+}
 
-export default function AccessesByState () {
+export default function AccessesByState ({
+  locationMetrics
+}: AccessesByStateProps) {
   const [stateAccessMetrics, setStateAccessMetrics] = useState([])
   const [countryAccessMetrics, setCountryAccessMetrics] = useState([])
 
@@ -19,9 +24,9 @@ export default function AccessesByState () {
   const [value, setValue] = useState("Brazil")
 
   useEffect(() => {
-    const getMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const locationMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("location:"))
+    const getMetrics = () => {
+      if (!locationMetrics) return
+
       const locationCountByState = {}
       const locationCountByCountry = {}
 
@@ -57,7 +62,7 @@ export default function AccessesByState () {
     }
 
     getMetrics()
-  }, [selectedCountry])
+  }, [selectedCountry, locationMetrics])
 
   return (
     <div className="flex flex-col gap-4">

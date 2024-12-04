@@ -4,20 +4,27 @@ import { IMetric } from "@/interfaces/IMetrics";
 import { MetricsServices } from "@/services/metrics.service";
 import { useEffect, useState } from "react"
 
-export default function AccessesByOperatingSystem () {
+interface AccessesByOperatingSystemProps {
+  accessMetrics: IMetric[]
+}
+
+export default function AccessesByOperatingSystem ({
+  accessMetrics
+}: AccessesByOperatingSystemProps) {
   const [operatingSystemAccessMetrics, setOperatingSystemAccessMetrics] = useState<IMetric []>([]);
 
   useEffect(() => {
-    const getOperatingSystemMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const accessMetrics = allMetrics
+    const getOperatingSystemMetrics = () => {
+      if (!accessMetrics) return
+
+      const formatedMetrics = accessMetrics
         .filter(({ link_type }) => link_type.startsWith("origin:"))
         .map((metric) => ({
           ...metric,
           system:  metric.system ?? "Unknown OS" 
         }))
       
-      const systemCounts = accessMetrics.reduce((acc, { system }) => {
+      const systemCounts = formatedMetrics.reduce((acc, { system }) => {
         const found = acc.find((item) => item.name.toLowerCase() === system.toLowerCase());
         if (found) {
           found.value += 1;
@@ -32,7 +39,7 @@ export default function AccessesByOperatingSystem () {
     }
 
     getOperatingSystemMetrics()
-  }, [])
+  }, [accessMetrics])
 
   return (
     <div

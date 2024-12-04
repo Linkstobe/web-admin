@@ -142,6 +142,7 @@ export default function CreateAdminUserForm () {
           cellphone: "00",
           permission,
           profile_photo: "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp",
+          blocked: false
         });
       }
 

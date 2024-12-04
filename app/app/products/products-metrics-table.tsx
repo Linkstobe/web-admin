@@ -1,12 +1,27 @@
 'use client'
 import { Table } from "@/components/table"
+import { IMetric } from "@/interfaces/IMetrics"
+import { IProduct } from "@/interfaces/IProducts"
+import { ITransaction } from "@/interfaces/ITransactions"
 import { MetricsServices } from "@/services/metrics.service"
 import { ProductService } from "@/services/product.service"
 import { TransactionService } from "@/services/transactions.service"
 import { Pagination, Stack } from "@mui/material"
 import { useEffect, useState } from "react"
 
-export default function ProductMetricsTable () {
+interface ProductMetricsTableProps {
+  products: IProduct[]
+  transactions: ITransaction[]
+  productAccessMetrics: IMetric[]
+  productClicksMetrics: IMetric[]
+}
+
+export default function ProductMetricsTable ({
+  productAccessMetrics,
+  productClicksMetrics,
+  products,
+  transactions
+}: ProductMetricsTableProps) {
   const [productsMetrics, setProductsMetrics] = useState([])
   const [filteredProductsMetrics, setFilteredProductsMetrics] = useState([])
 
@@ -40,19 +55,9 @@ export default function ProductMetricsTable () {
 
   useEffect(() => {
     const getAllProducts = async () => {
-      const allProducts = await ProductService.getAll()
-      const allTransactions = await TransactionService.onGetAllTransactions()
-      const allMetrics = await MetricsServices.onGetAllMetrics()
+      if (!productAccessMetrics || !productClicksMetrics || !products || !transactions) return
 
-      const productsAccessesMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("view:product"))
-      const productClicksMetrics = allMetrics.filter(({ link_type }) => (
-        link_type.startsWith("click:panel-Carrossel") ||
-        link_type.startsWith("click:panel-Carrossel-Imagens") ||
-        link_type.startsWith("click:panel-Galeria") ||
-        link_type.startsWith("click:panel-Bloco")
-      ))
-
-      const productsWithMetrics = allProducts.map(({ id, title }) => {
+      const productsWithMetrics = products.map(({ id, title }) => {
         const productMetrics = {
           name: title,
           totalAccesses: 0,
@@ -61,7 +66,7 @@ export default function ProductMetricsTable () {
           invoicing: 0,
         }
 
-        productMetrics.totalAccesses = productsAccessesMetrics.reduce((total, { link_type }) => {
+        productMetrics.totalAccesses = productAccessMetrics.reduce((total, { link_type }) => {
           return link_type === `view:product-${id}` ? total + 1 : total
         }, 0)
 
@@ -70,11 +75,11 @@ export default function ProductMetricsTable () {
           return Number(productId) === Number(id) ? total + 1 : total
         }, 0)
 
-        productMetrics.finisheds = allTransactions.reduce((total, { productId }) => {
+        productMetrics.finisheds = transactions.reduce((total, { productId }) => {
           return Number(productId) === Number(id) ? total + 1 : total
         }, 0)
 
-        productMetrics.invoicing = allTransactions.reduce((total, { productId, amount }) => {
+        productMetrics.invoicing = transactions.reduce((total, { productId, amount }) => {
           return Number(productId) === Number(id) ? total + (Number(amount) / 100) : total
         }, 0)
 
@@ -86,7 +91,7 @@ export default function ProductMetricsTable () {
     }
 
     getAllProducts()
-  }, [])
+  }, [productAccessMetrics, productClicksMetrics, products, transactions])
 
   return (
     <Table.Root>
@@ -120,7 +125,7 @@ export default function ProductMetricsTable () {
                 <Table.BodyItem className="truncate max-w-32" text={totalAccesses} explanation={totalAccesses} />
                 <Table.BodyItem className="truncate max-w-20" text={totalClicks} explanation={totalClicks} />
                 <Table.BodyItem className="truncate capitalize max-w-20" text={finisheds} explanation={finisheds} />
-                <Table.BodyItem className="truncate capitalize max-w-20" text={invoicing} explanation={invoicing} />
+                <Table.BodyItem className="truncate capitalize max-w-20" text={"R$ " + invoicing} explanation={invoicing} />
               </Table.Row>
             ))
           }

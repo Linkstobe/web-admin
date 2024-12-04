@@ -1,5 +1,6 @@
 'use client'
 import { AnalyticsSimpleCard } from "@/components/analytics-simple-card";
+import { IMetric } from "@/interfaces/IMetrics";
 import { MetricsServices } from "@/services/metrics.service";
 import { Computer, MousePointerClick, Percent, User } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -11,7 +12,15 @@ type ProjectMetrics = {
   engagementRate: number
 }
 
-export default function ProjectsMetricsCards () {
+interface ProjectsMetricsCardsProps {
+  accessesMetrics: IMetric[]
+  clicksMetrics: IMetric[]
+}
+
+export default function ProjectsMetricsCards ({
+  accessesMetrics,
+  clicksMetrics
+}: ProjectsMetricsCardsProps) {
   const [projectsMetrics, setProjectsMetrics] = useState<ProjectMetrics>({
     uniqueAccesses: 0,
     totalAccesses: 0,
@@ -20,11 +29,9 @@ export default function ProjectsMetricsCards () {
   })
 
   useEffect(() => {
-    const getAllAccessesMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
+    const getAllAccessesMetrics = () => {
 
-      const accessesMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("origin:"))
-      const clicksMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("click:"))
+      if (!accessesMetrics || !clicksMetrics) return
 
       const uniqueIps = new Set()
       let uniqueAccessCount = 0
@@ -44,12 +51,12 @@ export default function ProjectsMetricsCards () {
         uniqueAccesses: uniqueAccessCount,
         totalAccesses,  
         totalClicks,
-        engagementRate:  parseFloat(((totalClicks / totalAccesses) * 100).toFixed(2)),
+        engagementRate: totalAccesses !== 0 ? parseFloat(((totalClicks / totalAccesses) * 100).toFixed(2)) : 0,
       }))
     }
 
     getAllAccessesMetrics()
-  }, [])
+  }, [accessesMetrics, clicksMetrics])
 
   return (
     <div

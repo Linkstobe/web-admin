@@ -11,12 +11,16 @@ import TableTitle from "./TableTitle";
 import TableTopSection from "./TableTopSection";
 import TableSearch from "./TableSearch";
 import TableFooter from "./TableFooter";
+import TableTopButtonConfirm from "./TableTopButtonConfirm";
+import TableTopButtonCancel from "./TableTopButtonCancel";
 
 export const Table = {
   Root: TableRoot,
   TopSection: TableTopSection,
   Title: TableTitle,
   Search: TableSearch,
+  TopButtonConfirm: TableTopButtonConfirm,
+  TableTopButtonCancel: TableTopButtonCancel,
   TopButton: TableTopButton, 
   Content: TableContent,
   HeaderSection: TableHeaderSection,

@@ -10,7 +10,7 @@ import { Pagination, PaginationItem, Stack } from "@mui/material"
 import { Check, ChevronsUpDown, Ellipsis } from "lucide-react"
 import { useEffect, useState } from "react"
 
-export default function ClickThroughRate () {
+export default function AverageTimeOnPage () {
   const [projects, setProjects] = useState<IProject[]>([])
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
   

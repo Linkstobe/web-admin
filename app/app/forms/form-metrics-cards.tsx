@@ -1,9 +1,17 @@
 'use client'
 import { AnalyticsSimpleCard } from "@/components/analytics-simple-card";
+import { IForm } from "@/interfaces/IForms";
+import { IMetric } from "@/interfaces/IMetrics";
 import { FormService } from "@/services/form.service";
 import { MetricsServices } from "@/services/metrics.service";
 import { Computer, MousePointerClick, Percent, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
+
+interface FormMetricsCardsProps {
+  formAccessMetrics: IMetric[]
+  formClicksMetrics: IMetric[]
+  forms: IForm[]
+}
 
 type FormMetrics = {
   uniqueAccesses: number
@@ -12,7 +20,11 @@ type FormMetrics = {
   registers: number
 }
 
-export default function FormMetricsCards () {
+export default function FormMetricsCards ({
+  formAccessMetrics,
+  formClicksMetrics,
+  forms
+}: FormMetricsCardsProps) {
   const [formMetrics, setFormMetrics] = useState<FormMetrics>({
     uniqueAccesses: 0,
     clicks: 0,
@@ -22,17 +34,14 @@ export default function FormMetricsCards () {
 
   useEffect(() => {
     const getFormMetrics = async () => {
-      const allMetrcics = await MetricsServices.onGetAllMetrics()
-      const allForms = await FormService.getAllForms()
+      if (!formAccessMetrics || !formAccessMetrics || !forms) return
 
-      const allFormAccess = allMetrcics.filter(({ link_type }) => link_type.startsWith("view:form"))
-      const allFormClicks = allMetrcics.filter(({ link_type }) => link_type.startsWith("click:panel-Modelo padrão-"))
-      const allFormRegisters = allForms.reduce((acc, form) => acc + form.responses.length, 0)
+      const allFormRegisters = forms.reduce((acc, form) => acc + form.responses.length, 0)
 
       const uniqueIps = new Set()
       let uniqueAccessCount = 0
 
-      allFormAccess.forEach(({ ip }) => {
+      formAccessMetrics.forEach(({ ip }) => {
         if (!uniqueIps.has(ip)) {
           uniqueIps.add(ip)
           uniqueAccessCount += 1
@@ -42,14 +51,14 @@ export default function FormMetricsCards () {
       setFormMetrics(prevMetrics => ({
         ...prevMetrics,
         uniqueAccesses: uniqueAccessCount,
-        clicks: allFormClicks.length,
+        clicks: formClicksMetrics.length,
         registers: allFormRegisters,
-        engagementRate: parseFloat(((allFormRegisters / uniqueAccessCount) * 100).toFixed(2))
+        engagementRate: uniqueAccessCount === 0 ? 0 : parseFloat(((allFormRegisters / uniqueAccessCount) * 100).toFixed(2))
       }))
     }
 
     getFormMetrics()
-  },[])
+  }, [formAccessMetrics, formClicksMetrics, forms])
 
 
   return (

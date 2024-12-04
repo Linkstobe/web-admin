@@ -7,6 +7,12 @@ import { MetricsServices } from "@/services/metrics.service"
 import { Pagination, Stack } from "@mui/material"
 import { useEffect, useState } from "react"
 
+interface FormMetricsTableProps {
+  formAccessMetrics: IMetric[]
+  formClicksMetrics: IMetric[]
+  forms: IForm[]
+}
+
 type TableFormMetric = {
   name: string
   totalAccesses: number
@@ -15,7 +21,11 @@ type TableFormMetric = {
   engagement: number
 }
 
-export default function FormMetricsTable () {
+export default function FormMetricsTable ({
+  formAccessMetrics,
+  formClicksMetrics,
+  forms
+}: FormMetricsTableProps) {
   const [formMetrics, setFormMetrics] = useState<TableFormMetric[]>([])
   const [filteredFormMetrics, setFilteredFormMetrics] = useState<TableFormMetric[]>([])
 
@@ -49,19 +59,15 @@ export default function FormMetricsTable () {
 
   useEffect(() => {
     const getAllFormMetrics = async () => {
-      const allMetrics: IMetric[] = await MetricsServices.onGetAllMetrics()
-      const allForms: IForm[] = await FormService.getAllForms()
+      if (!formAccessMetrics || !formAccessMetrics || !forms) return
 
-      const formAccessesMetrics: IMetric[] = allMetrics.filter(({ link_type }) => link_type.startsWith("view:form"))
-      const formClicksMetrics: IMetric[] = allMetrics.filter(({ link_type }) => link_type.startsWith("click:panel-Modelo padrão"))
-
-      const formWithMetrics: TableFormMetric[] = allForms.map(({ id, form_name: name, responses, project_id }) => {
+      const formWithMetrics: TableFormMetric[] = forms.map(({ id, form_name: name, responses, project_id }) => {
         const totalClicks: number = formClicksMetrics.reduce((count, { link_type }) => {
           const formId = link_type.split("-")[3]
           return Number(formId) === Number(id) ? count + 1 : count
         }, 0)
 
-        const totalAccesses: number = formAccessesMetrics.reduce((count, { link_type }) => {
+        const totalAccesses: number = formAccessMetrics.reduce((count, { link_type }) => {
           const idForm = link_type.split("-")[1]
           return Number(idForm) === Number(id) ? count + 1 : count
         }, 0)
@@ -83,7 +89,7 @@ export default function FormMetricsTable () {
     }
 
     getAllFormMetrics()
-  }, [])
+  }, [formAccessMetrics, formClicksMetrics, forms])
 
   return (
     <Table.Root>

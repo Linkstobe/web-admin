@@ -4,13 +4,19 @@ import EngagementCard from "./engagement-card"
 import { IProject } from "@/interfaces/IProjects"
 import { ProjectService } from "@/services/project.service"
 
+interface ProjectEngagementCardProps {
+  projects: IProject[]
+}
+
 type ProjectCreationMetrics = {
   total: number
   inTheLastSevenDays: number
   inTheLastMonth: number
 }
 
-export default function ProjectEngagementCard () {
+export default function ProjectEngagementCard ({
+  projects
+}: ProjectEngagementCardProps) {
   const [projectCreationMetrics, setProjectCreationMetrics] = useState<ProjectCreationMetrics>({
     total: 0,
     inTheLastSevenDays: 0,
@@ -19,9 +25,7 @@ export default function ProjectEngagementCard () {
 
   useEffect(() => {
     const getProjectCreationMetrics = async () => {
-      const allProjects: IProject[] = await ProjectService.getAllProject()
-
-      const validProjects: IProject[] = allProjects.filter(({ linkstoBe }) =>
+      const validProjects: IProject[] = projects.filter(({ linkstoBe }) =>
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe")

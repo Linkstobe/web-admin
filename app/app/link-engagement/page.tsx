@@ -1,51 +1,94 @@
-import AverageTimeOnPage from "./average-time-on-page";
-import ClickThroughRate from "./click-through-rate";
-import ClickedProjects from "./clicked-projects";
-import EngagementFunnel from "./engagement-funnel";
-import NewLinkSourceTable from "./new-link-source-table";
-import ProjectEngagementCard from "./project-engagement-card";
+import { getCookie } from "@/lib/auth";
+import LinkEngagementContent from "./link-engagement-content";
+import { IProject } from "@/interfaces/IProjects";
+import { IMetric } from "@/interfaces/IMetrics";
+import { IPainel } from "@/interfaces/IPanels";
+import { IUser } from "@/interfaces/IUser";
 
-export default function LinkEngagement () {
+export default async function LinkEngagement () {
+  const token = getCookie("authToken")
+
+  const projectAccessMetrics: IMetric[] = []
+  const panelClicksMetrics: IMetric[] = []
+
+  let allProjects: IProject[] = []
+  let allPanels: IPainel[] = []
+  let allUsers: IUser[] = []
+
+  try {
+    const projectsUrl = `${process.env.NEXT_PUBLIC_API_URL}/projects`;
+    const metricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics`;
+    const panelsUrl = `${process.env.NEXT_PUBLIC_API_URL}/painels`;
+    const usersUrl = `${process.env.NEXT_PUBLIC_API_URL}/users`;
+
+    const [
+      projectsResponse,
+      metricsResponse,
+      panelsResponse,
+      usersResponse,
+    ] = await Promise.all([
+      fetch(projectsUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(metricsUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(panelsUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+      fetch(usersUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      }),
+    ])
+
+    const requestFailed = 
+      !projectsResponse.ok ||
+      !metricsResponse.ok ||
+      !panelsResponse.ok ||
+      !usersResponse.ok
+    
+    if (requestFailed) {
+      throw new Error("Falha em uma ou mais requisições");
+    }
+
+    const [projects, metrics, panels, users]: [IProject[], IMetric[], IPainel[], IUser[]] = await Promise.all([
+      projectsResponse.json(),
+      metricsResponse.json(),
+      panelsResponse.json(),
+      usersResponse.json()
+    ])
+
+    allProjects = projects
+    allPanels = panels
+    allUsers = users
+
+    metrics.forEach((metric) => {
+      const { link_type } = metric
+
+      const isAccessMetric = link_type.startsWith("origin:")
+      const isPanelClickMetric =
+        link_type.startsWith("click:panel-link") || 
+        link_type.startsWith("click:panel-basic") || 
+        link_type.startsWith("click:panel-advanced")
+
+      if (isAccessMetric) {
+        projectAccessMetrics.push(metric)
+      } else if (isPanelClickMetric) {
+        panelClicksMetrics.push(metric)
+      }
+    })
+
+  } catch (error) {
+    console.log("LinkEngagement: ", error)
+  }
+
   return (
-   <div
-      className="flex flex-col gap-4 pb-20"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 bg-white p-2 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold tracking-tight">Engajamento - Projetos</h2>
-      </div>
-
-      <ProjectEngagementCard />
-
-      <div
-        className="grid grid-cols-[2fr_1fr] gap-4"
-      >
-        <div>
-          <ClickedProjects />
-        </div>
-
-        <div
-          className="h-full"
-        >
-          <EngagementFunnel />
-        </div>
-      </div>
-
-      <div
-        className="grid grid-cols-2 gap-4"
-      >
-        <div>
-          <AverageTimeOnPage />
-        </div>
-
-        <div>
-          <ClickThroughRate />
-        </div>
-      </div>
-
-      <div>
-        <NewLinkSourceTable />
-      </div>
-
-    </div> 
+    <LinkEngagementContent 
+      projects={allProjects}
+      projectAccessMetrics={projectAccessMetrics}
+      panelsClicksMetrics={panelClicksMetrics}
+      panels={allPanels}
+      users={allUsers}
+    />
   )
 }

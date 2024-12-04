@@ -19,4 +19,6 @@ export interface IForm {
   project_id: number;
   questions: IQuestion[];
   responses: IResponse[];
+  createdAt: string
+  updateddAt: string
 }

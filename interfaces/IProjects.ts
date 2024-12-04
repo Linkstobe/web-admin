@@ -16,6 +16,7 @@ export interface IProject {
   arquived: boolean;
   role?: string
   referral_id: string
+  blocked: boolean
 }
 
 export interface IUpdateProject extends Partial<IProject> {}
@@ -33,4 +34,5 @@ export interface ICreateProject {
     social_media: string;
   }[];
   arquived: boolean;
+  blocked: boolean
 }

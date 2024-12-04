@@ -5,22 +5,21 @@ import { MetricsServices } from "@/services/metrics.service"
 import { subDays } from "date-fns"
 import { IMetric } from "@/interfaces/IMetrics"
 
-export default function AccessesPerHour() {
+interface AccessesPerHourProps {
+  accessMetrics: IMetric[]
+  clicksMetrics: IMetric[]
+}
+
+export default function AccessesPerHour ({
+  accessMetrics,
+  clicksMetrics
+}: AccessesPerHourProps) {
   const [metricsPerHour, setMetricsPerHour] = useState([])
 
   useEffect(() => {
     const getAllMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const accessMetrics = allMetrics.filter(({ link_type, createdAt }) =>
-        link_type.startsWith("origin:") &&
-        new Date(createdAt) >= subDays(new Date(), 90)
-      )
-
-      const clicksMetrics = allMetrics.filter(({ link_type, createdAt }) =>
-        link_type.startsWith("click:") &&
-        new Date(createdAt) >= subDays(new Date(), 90)
-      )
-
+      if (!accessMetrics || !clicksMetrics) return
+      
       const hourlyMetrics = Array.from({ length: 24 }, (_, i) => ({
         name: `${i}h`,
         acessos: 0,
@@ -41,7 +40,7 @@ export default function AccessesPerHour() {
     }
 
     getAllMetrics()
-  }, [])
+  }, [accessMetrics, clicksMetrics])
 
   return (
     <div className="w-full bg-white rounded-lg">

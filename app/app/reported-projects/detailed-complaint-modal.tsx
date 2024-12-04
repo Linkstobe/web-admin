@@ -1,16 +1,126 @@
+'use client'
+
 import { Modal } from "@/components/modal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { IComplaint } from "@/interfaces/IComplaints";
+import { IProject } from "@/interfaces/IProjects";
+import { IUser } from "@/interfaces/IUser";
+import { ComplaintService } from "@/services/complaint.service";
+import { ProjectService } from "@/services/project.service";
+import { UserService } from "@/services/user.service";
+import { jwtDecode } from "jwt-decode";
 import { BadgeInfo, Calendar, Crown, Mail, Phone, TriangleAlert, User } from "lucide-react";
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactNode, useEffect, useState } from "react";
 
 interface DetailedComplaintModalProps extends HTMLAttributes<HTMLDataElement> {
   children: ReactNode
+  complaintId: number
+  projectId: number
+  userId: number
 }
 
+
+type AccusedInfo = {
+  name: string
+  email: string
+  cellphone?: string
+  createdAt: string
+  reportedLinkstobe: string
+  reportedLinkstobePlan: string
+}
+
+type ComplainantInfo = {
+  name: string
+  email: string
+}
+
+type ComplaintDetails = {
+  type: string
+  createdAt: string
+  comment: string
+}
+
+type ComplaintItem = {
+  accusedInfo: AccusedInfo
+  complainantInfo: ComplainantInfo
+  complaintDetails: ComplaintDetails
+}
+
+
 export default function DetailedComplaintModal ({
-  children
+  children,
+  complaintId,
+  projectId,
+  userId
 }: DetailedComplaintModalProps) {
+  const [complaintItem, setComplaintInfo] = useState<ComplaintItem>({
+    accusedInfo: {
+      name: "",
+      email: "",
+      cellphone: "",
+      createdAt: "",
+      reportedLinkstobe: "",
+      reportedLinkstobePlan: "",
+    },
+    complainantInfo: {
+      email: "",
+      name: ""
+    },
+    complaintDetails: {
+      comment: "",
+      createdAt: "",
+      type: ""
+    }
+  })
+
+  const roleStyle = {
+    "basic": "bg-[#20B120]",
+    "free": "bg-[#20B120]",
+    "pro": "bg-[#164F62]",
+    "premium": "bg-[#299FC7]",
+  }
+
+  useEffect(() => {
+    const onGetComplaint = async () => {
+      try {
+        const [complaint, project, user] = await Promise.all([
+          ComplaintService.onGetComplaintById(complaintId),
+          ProjectService.getProjectById(projectId),
+          UserService.getUserById(userId)
+        ])
+
+        const complaintInfos: ComplaintItem = {
+          accusedInfo: {
+            createdAt: new Date(user.createdAt).toLocaleDateString("pt-BR"),
+            email: user.email,
+            name: user.name,
+            reportedLinkstobe: project.linkstoBe,
+            //@ts-ignore
+            reportedLinkstobePlan: jwtDecode(project.role)?.role.toLocaleLowerCase() || "",
+            cellphone: user?.cellphone
+          },
+          complainantInfo: {
+            name: complaint.name,
+            email: complaint.email,
+          },
+          complaintDetails: {
+            comment: complaint.comments,
+            type: complaint.type,
+            createdAt: new Date(complaint.createdAt).toLocaleDateString("pt-BR"),
+          },
+        }
+
+        setComplaintInfo(complaintInfos)
+      } catch (error) {
+        console.log("DetailedComplaintModal: ", error) 
+      }
+    }
+
+    onGetComplaint()
+  }, [])
+
   return (
     <Modal.Root>
       <Modal.OpenButton>
@@ -52,7 +162,7 @@ export default function DetailedComplaintModal ({
                   <h4
                     className="font-medium text-lg text-center sm:text-start"
                   >
-                    Nome do denunciado
+                    {complaintItem.accusedInfo.name}
                   </h4>
                   <div
                     className="flex flex-col gap-2 sm:flex-row sm:items-center"
@@ -67,23 +177,26 @@ export default function DetailedComplaintModal ({
                       <span
                         className="text-sm"
                       >
-                        dev.cvitor@gmail.com
+                        {complaintItem.accusedInfo.email}
                       </span>
                     </div>
 
-                    <div
-                      className="flex gap-1 items-center"
-                    >
-                      <Phone 
-                        size={15}
-                      />
-
-                      <span
-                        className="text-sm"
+                    {
+                      complaintItem.accusedInfo?.cellphone && 
+                      <div
+                        className="flex gap-1 items-center"
                       >
-                        +55 88 99887766554
-                      </span>
-                    </div>
+                        <Phone 
+                          size={15}
+                        />
+
+                        <span
+                          className="text-sm"
+                        >
+                          {complaintItem.accusedInfo?.cellphone}
+                        </span>
+                      </div>
+                    }
                   </div>
 
                 </div>
@@ -103,7 +216,7 @@ export default function DetailedComplaintModal ({
                 </h4>
 
                 <span>
-                  linkstobe
+                  {complaintItem.accusedInfo.reportedLinkstobe}
                 </span>
               </div>
 
@@ -121,7 +234,7 @@ export default function DetailedComplaintModal ({
                 </h4>
 
                 <span>
-                  12/08/2024
+                  {complaintItem.accusedInfo.createdAt}
                 </span>
               </div>
 
@@ -139,7 +252,11 @@ export default function DetailedComplaintModal ({
                 </h4>
 
                 <span>
-                  Free
+                  <Badge
+                    className={roleStyle[complaintItem.accusedInfo.reportedLinkstobePlan]}
+                  >
+                    {complaintItem.accusedInfo.reportedLinkstobePlan.toLocaleUpperCase()}
+                  </Badge>
                 </span>
               </div>
             </div>
@@ -169,7 +286,7 @@ export default function DetailedComplaintModal ({
                 </h4>
 
                 <span>
-                  Carlos Vitor
+                  {complaintItem.complainantInfo.name}
                 </span>
 
               </div>
@@ -190,7 +307,7 @@ export default function DetailedComplaintModal ({
                 <span
                   className="whitespace-nowrap"
                 >
-                  dev.cvitor@gmail.com
+                  {complaintItem.complainantInfo.email}
                 </span>
               </div>
             </div>
@@ -222,7 +339,7 @@ export default function DetailedComplaintModal ({
                 <span
                   className="whitespace-nowrap"
                 >
-                  O projeto contém apologia a algo
+                  {complaintItem.complaintDetails.type}
                 </span>
               </div>
 
@@ -240,7 +357,7 @@ export default function DetailedComplaintModal ({
                 </h4>
 
                 <span>
-                  23/11/2024
+                  {complaintItem.complaintDetails.createdAt}
                 </span>
 
               </div>
@@ -257,7 +374,7 @@ export default function DetailedComplaintModal ({
                 <p
                   className="font-medium text-sm"
                 >
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas nulla sequi minus, illo veritatis aliquam esse facere eius illum, earum enim voluptatem temporibus optio modi laudantium, voluptatum eligendi excepturi perferendis.
+                  {complaintItem.complaintDetails.comment}
                 </p>
               </div>
             </div>

@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type TableMetrics = {
+  id: string | number
   name: string
   email: string
   cellphone: string

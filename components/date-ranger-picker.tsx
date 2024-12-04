@@ -16,12 +16,15 @@ import {
 import { ptBR } from "date-fns/locale"
 
 export default function CalendarDateRangePicker ({
+  date,
+  setDate,
   className,
-}: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2023, 0, 20),
-    to: addDays(new Date(2023, 0, 20), 20),
-  })
+}: {
+  date: DateRange | undefined
+  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>
+  className?: string
+}) {
+  const [tempDate, setTempDate] = React.useState<DateRange | undefined>(date)
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -46,20 +49,37 @@ export default function CalendarDateRangePicker ({
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span>Pick a date</span>
+              <span>Selecione um período</span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="end">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
-            numberOfMonths={2}
-            locale={ptBR}
-          />
+          <div className="flex flex-col space-y-2 p-2">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={tempDate?.from}
+              selected={tempDate}
+              onSelect={setTempDate}
+              numberOfMonths={2}
+              locale={ptBR}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setTempDate(date)} // Reseta para o valor atual
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
+                  setDate(tempDate) // Confirma a seleção
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
     </div>

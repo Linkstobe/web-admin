@@ -14,15 +14,25 @@ import { Pagination, PaginationItem, Stack } from "@mui/material"
 import { Check, ChevronsUpDown, Ellipsis } from "lucide-react"
 import { useEffect, useState } from "react"
 
+interface ClickThroughRateProps {
+  projects: IProject[]
+  panelsClicksMetrics: IMetric[]
+  panels: IPainel[]
+}
+
 type PanelMetric = {
   name: string
   cliques: string | number
   fill: string
 }
 
-export default function ClickThroughRate () {
+export default function ClickThroughRate ({
+  projects,
+  panelsClicksMetrics,
+  panels
+}: ClickThroughRateProps) {
 
-  const [projects, setProjects] = useState<IProject[]>([])
+  const [allProjects, setProjects] = useState<IProject[]>([])
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
   
   const [allClickMetrics, setAllClickMetrics] = useState<IMetric[]>([])
@@ -47,11 +57,11 @@ export default function ClickThroughRate () {
 
   const onFilterProject = (value: string): void => {
     if (value.trim() === "") {
-     setFilteredProjects(projects) 
+     setFilteredProjects(allProjects) 
      return
     }
 
-    const filteredData: IProject[] = projects.filter(({ linkstoBe }) => linkstoBe.includes(value))
+    const filteredData: IProject[] = allProjects.filter(({ linkstoBe }) => linkstoBe.includes(value))
 
     setFilteredProjects(filteredData)
     setCurrentPage(1)
@@ -69,40 +79,16 @@ export default function ClickThroughRate () {
     colorPalette[index % colorPalette.length]
 
   useEffect(() => {
-    const getProjectMetrics = async () => {
-      const allProjects: IProject[] = await ProjectService.getAllProject()
-      const validProjects = allProjects.filter(({ linkstoBe }) => 
-        !linkstoBe.includes("temanovo_") &&
-        !linkstoBe.includes("tema_") &&
-        !linkstoBe.includes("modelos_linkstobe")
-      )
-      
-      const allMetrics: IMetric[] = await MetricsServices.onGetAllMetrics()
-      const clickMetrics = allMetrics.filter(({ link_type }) => 
-        link_type.startsWith("click:panel-link") || 
-        link_type.startsWith("click:panel-basic") || 
-        link_type.startsWith("click:panel-advanced")
-      )
-
-      setAllClickMetrics(clickMetrics)
-      setProjects(validProjects)
-      setFilteredProjects(validProjects)
-    }
-
-    getProjectMetrics()
-  }, [])
-
-  useEffect(() => {
     const getPanelMetrics = async () => {
-      const allPanels: IPainel[] = await PainelService.getPainelByProjectId(selectedProjectId)
+      if (!panelsClicksMetrics) return
 
-      const validPanels = allPanels.filter(({ painel_style }) =>
+      const validPanels = panels.filter(({ painel_style }) =>
         ["link", "basic", "advanced"].includes(painel_style)
       )
 
       const panelMetrics = validPanels.map((panel, index) => {
         const panelId = panel.id
-          const clicks = allClickMetrics.reduce((count, metric) => {
+          const clicks = panelsClicksMetrics.reduce((count, metric) => {
             const metricId = metric.link_type.split('-').pop()
             return Number(metricId) === Number(panelId) ? count + 1 : count
           }, 0)
@@ -117,10 +103,8 @@ export default function ClickThroughRate () {
       setPanelMetrics(panelMetrics)
     }
 
-    if (selectedProjectId) {
-      getPanelMetrics()
-    }
-  }, [selectedProjectId, allClickMetrics])
+    getPanelMetrics()
+  }, [selectedProjectId, allClickMetrics, panelsClicksMetrics])
 
   return (
     <div
@@ -138,7 +122,7 @@ export default function ClickThroughRate () {
             Taxa de Cliques (CTR)
           </p>
 
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -208,7 +192,7 @@ export default function ClickThroughRate () {
                 </CommandList>
               </Command>
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </div>
       </div>
       <div>

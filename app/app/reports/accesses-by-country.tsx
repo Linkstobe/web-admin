@@ -5,7 +5,13 @@ import { MetricsServices } from "@/services/metrics.service"
 import { Pagination, Stack } from "@mui/material"
 import { useEffect, useState } from "react"
 
-export default function AccessesByCountry () {
+interface AccessesByCountryProps {
+  locationMetrics: IMetric[]
+}
+
+export default function AccessesByCountry ({
+  locationMetrics
+}: AccessesByCountryProps) {
   const [countryAccessMetrics, setCountryAccessMetrics] = useState([])
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -23,9 +29,8 @@ export default function AccessesByCountry () {
 
   useEffect(() => {
     const getCountryMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const locationMetrics = allMetrics.filter(({ link_type }) => link_type.startsWith("location:"))
-      
+      if (!locationMetrics) return
+
       const locationCount = locationMetrics.reduce((acc, { link_type }) => {
         const locationName = link_type.replace("location:", "")
         let [country] = locationName.split("-")
@@ -46,7 +51,7 @@ export default function AccessesByCountry () {
     }
 
     getCountryMetrics()
-  }, [])
+  }, [locationMetrics])
 
   return (
     <Table.Root

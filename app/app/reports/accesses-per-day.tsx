@@ -1,30 +1,33 @@
 'use client'
+
 import { useEffect, useState } from "react"
-import { MetricsServices } from "@/services/metrics.service"
 import { eachDayOfInterval, format, subDays } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { IMetric } from "@/interfaces/IMetrics"
 import MetricChart from "./metric-chart"
+import { DateRange } from "react-day-picker"
 
-export default function AccessesPerDay() {
+interface AccessesPerDayProps {
+  accessMetrics: IMetric[]
+  clicksMetrics: IMetric[]
+  dateRange: DateRange | undefined
+}
+
+export default function AccessesPerDay ({
+  accessMetrics,
+  clicksMetrics,
+  dateRange
+}: AccessesPerDayProps) {
   const [metricsPerDay, setMetricsPerDay] = useState([])
 
   useEffect(() => {
     const getAllMetrics = async () => {
-      const allMetrics = await MetricsServices.onGetAllMetrics()
-      const startDate = subDays(new Date(), 89)
-      const endDate = new Date()
+      if (!accessMetrics || !clicksMetrics) return
+
+      const startDate = dateRange?.from || subDays(new Date(), 89)
+      const endDate = dateRange?.to || new Date()
+
       const daysArray = eachDayOfInterval({ start: startDate, end: endDate })
-
-      const accessMetrics = allMetrics.filter(({ link_type, createdAt }) =>
-        link_type.startsWith("origin:") &&
-        new Date(createdAt) >= startDate
-      )
-
-      const clicksMetrics = allMetrics.filter(({ link_type, createdAt }) =>
-        link_type.startsWith("click:") &&
-        new Date(createdAt) >= startDate
-      )
 
       const metricsByDay = daysArray.map((day) => {
         const dateString = format(day, 'dd/MM', { locale: ptBR })
@@ -44,7 +47,7 @@ export default function AccessesPerDay() {
     }
 
     getAllMetrics()
-  }, [])
+  }, [accessMetrics, clicksMetrics, dateRange])
 
   return (
     <div className="w-full bg-white rounded-lg">

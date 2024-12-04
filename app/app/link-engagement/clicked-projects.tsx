@@ -3,9 +3,12 @@ import { MetricsBarChart } from "@/components/metrics-bar-chart"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { IMetric } from "@/interfaces/IMetrics"
 import { IProject } from "@/interfaces/IProjects"
-import { MetricsServices } from "@/services/metrics.service"
-import { ProjectService } from "@/services/project.service"
 import { useEffect, useState } from "react"
+
+interface ClickedProjectsProps {
+  projects: IProject[]
+  projectAccessMetrics: IMetric[]
+}
 
 type ClickedProjectMetric = {
   name: string
@@ -17,10 +20,13 @@ type PeriodInDays ={
   days: number
 }
 
-export default function ClickedProjects () {
+export default function ClickedProjects ({
+  projects,
+  projectAccessMetrics
+}: ClickedProjectsProps) {
   const [clickedProjectMetrics, setClickedProjectMetrics] = useState<ClickedProjectMetric[]>([])
-  const [allMetrics, setAllMetrics] = useState<IMetric[]>([])
-  const [allProjects, setAllProjects] = useState<IProject[]>([])
+  const [allMetrics, setAllMetrics] = useState<IMetric[]>(projectAccessMetrics)
+  const [allProjects, setAllProjects] = useState<IProject[]>(projects)
   const [periodInDays, setPeriodInDays] = useState<PeriodInDays>({
     days: 30,
     name: "Mês"
@@ -58,11 +64,8 @@ export default function ClickedProjects () {
   }
 
   useEffect(() => {
-    const fetchMetricsAndProjects = async () => {
-      const metrics: IMetric[] = await MetricsServices.onGetAllMetrics()
-      const projects: IProject[] = await ProjectService.getAllProject()
-
-      setAllMetrics(metrics)
+    const fetchMetricsAndProjects = () => {
+      setAllMetrics(projectAccessMetrics)
       setAllProjects(projects)
     }
 
@@ -70,13 +73,13 @@ export default function ClickedProjects () {
   }, [])
 
   useEffect(() => {
-    if (!allMetrics.length || !allProjects.length) return
+    if (!allMetrics || !allProjects) return
 
     const now = new Date()
     const startDate = new Date()
     startDate.setDate(now.getDate() - periodInDays.days)
 
-    const filteredMetrics = allMetrics.filter(({ createdAt }) => {
+    const filteredMetrics = projectAccessMetrics.filter(({ createdAt }) => {
       const metricDate = new Date(createdAt)
       return metricDate >= startDate && metricDate <= now
     })
