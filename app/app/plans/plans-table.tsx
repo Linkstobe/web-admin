@@ -446,7 +446,15 @@ export function PlansTable() {
                     </Label>
                   </div>
                 </Table.BodyItem>
-                <Table.BodyItem text={"linksto.be/" + linkstoBe} />
+                <Table.BodyItem>
+                  <Link
+                    target="_blank"
+                    href={"https://linksto.be/" + linkstoBe}
+                    className="underline text-[#164F62] font-semibold"
+                  >
+                    {linkstoBe}
+                  </Link>
+                </Table.BodyItem>
                 <Table.BodyItem text={email} />
                 <Table.BodyItem text={cellphone} />
                 <Table.BodyItem text={status} />
