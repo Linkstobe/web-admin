@@ -2,7 +2,7 @@
 
 import { handleGetMenuList } from "@/lib/menu-list"
 import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "./ui/button"
 import Link from "next/link"
 import { Ellipsis, LogOut } from "lucide-react"
@@ -13,8 +13,11 @@ import {
   TooltipContent,
   TooltipProvider
 } from '@/components/ui/tooltip'
+
 import { useStore } from "@/hook/use-store"
 import { useSidebarToggle } from "@/hook/use-sidebar-toggle"
+
+import { deleteCookie } from "cookies-next"
 
 interface MenuProps {
   isOpen: boolean | undefined
@@ -23,12 +26,20 @@ interface MenuProps {
 export default function Menu ({
   isOpen
 }: MenuProps) {
+  const router = useRouter()
   const pathname = usePathname()
   const menus = handleGetMenuList(pathname)
 
   const sidebar = useStore(useSidebarToggle, (state) => state)
 
   if(!sidebar) return null
+
+
+  const onLogout = () => {
+    deleteCookie("authToken")
+    deleteCookie("permission")
+    router.push("/")
+  }
 
   return (
 
@@ -161,6 +172,7 @@ export default function Menu ({
                       variant={'ghost'}
                       className="w-full justify-start h-10 mb-1 p-0 hover:bg-accent"
                       asChild
+                      onClick={onLogout}
                     >
                       <Link href="/">
                         <span
