@@ -327,7 +327,7 @@ export function PlansTable() {
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.setAttribute("download", "dados.csv")
+    link.setAttribute("download", "tabela-planos.csv")
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
