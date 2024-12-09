@@ -14,7 +14,7 @@ interface FormMetricsCardsProps {
 }
 
 type FormMetrics = {
-  uniqueAccesses: number
+  totalAccessMetrics: number
   clicks: number
   engagementRate: number
   registers: number
@@ -26,7 +26,7 @@ export default function FormMetricsCards ({
   forms
 }: FormMetricsCardsProps) {
   const [formMetrics, setFormMetrics] = useState<FormMetrics>({
-    uniqueAccesses: 0,
+    totalAccessMetrics: 0,
     clicks: 0,
     engagementRate: 0,
     registers: 0
@@ -50,10 +50,10 @@ export default function FormMetricsCards ({
 
       setFormMetrics(prevMetrics => ({
         ...prevMetrics,
-        uniqueAccesses: uniqueAccessCount,
+        totalAccessMetrics: formAccessMetrics.length,
         clicks: formClicksMetrics.length,
         registers: allFormRegisters,
-        engagementRate: uniqueAccessCount === 0 ? 0 : parseFloat(((allFormRegisters / uniqueAccessCount) * 100).toFixed(2))
+        engagementRate: uniqueAccessCount === 0 ? 0 : parseFloat(((allFormRegisters / formAccessMetrics.length) * 100).toFixed(2))
       }))
     }
 
@@ -69,7 +69,7 @@ export default function FormMetricsCards ({
         <AnalyticsSimpleCard.Content>
           <AnalyticsSimpleCard.TopSection>
             <AnalyticsSimpleCard.Title 
-              title="Acessos únicos"
+              title="Acessos Totais"
             />
 
             <AnalyticsSimpleCard.Icon
@@ -78,7 +78,7 @@ export default function FormMetricsCards ({
           </AnalyticsSimpleCard.TopSection>
           <AnalyticsSimpleCard.BodySection>
             <AnalyticsSimpleCard.Value 
-              value={formMetrics.uniqueAccesses}
+              value={formMetrics.totalAccessMetrics}
             />
           </AnalyticsSimpleCard.BodySection>
         </AnalyticsSimpleCard.Content>

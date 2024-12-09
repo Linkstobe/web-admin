@@ -17,8 +17,6 @@ import {
 import { useStore } from "@/hook/use-store"
 import { useSidebarToggle } from "@/hook/use-sidebar-toggle"
 
-import { deleteCookie } from "cookies-next"
-
 interface MenuProps {
   isOpen: boolean | undefined
 }
@@ -36,9 +34,9 @@ export default function Menu ({
 
 
   const onLogout = () => {
-    deleteCookie("authToken")
-    deleteCookie("permission")
-    router.push("/")
+    document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "permission=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push("/");
   }
 
   return (
