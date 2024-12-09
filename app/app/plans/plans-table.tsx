@@ -288,6 +288,51 @@ export function PlansTable() {
     }
   }
 
+  const onGetCSV = () => {
+    if (!allProjects || allProjects.length === 0) {
+      console.error("Nenhum dado disponível para gerar o CSV.")
+      return
+    }
+
+    const headers = [
+      "Linkstobe",
+      "Nome",
+      "Email",
+      "Telefone",
+      "Plano",
+      "Status",
+      "Data de criação",
+    ]
+
+    const csvRows = [
+      headers.join(","),
+      ...allProjects.map((item) =>
+        [
+          "https://linksto.be/" + item.linkstoBe,
+          item.name,
+          item.email,
+          item.cellphone,
+          item.plan.toLocaleUpperCase(),
+          item.status,
+          item.projectCreatedAt,
+        ]
+          .map((field) => `"${field || ""}"`)
+          .join(",")
+      ),
+    ]
+
+    const csvContent = csvRows.join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", "dados.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
 
   return (
     <Table.Root>
@@ -400,6 +445,13 @@ export function PlansTable() {
                 Atualizar vários planos
               </Button>
 
+              <Button
+                variant="outline"
+                className="w-full text-start justify-start rounded-none text-[#767676]"
+                onClick={onGetCSV}
+              >
+                Exportar CSV
+              </Button>
             </PopoverContent>
           </Popover>
         </div>
