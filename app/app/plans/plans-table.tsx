@@ -77,7 +77,9 @@ export function PlansTable() {
       .filter(({ linkstoBe }) => 
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
-        !linkstoBe.includes("modelos_linkstobe")
+        !linkstoBe.includes("modelos_linkstobe") &&
+        !linkstoBe.includes("basic_buttons") &&
+        !linkstoBe.includes("custom_panel") 
       )
 
     const users = await UserService.getAllUsers()
