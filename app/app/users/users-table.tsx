@@ -14,7 +14,7 @@ import { ProjectService } from "@/services/project.service";
 import { UserService } from "@/services/user.service";
 import { Pagination, Stack } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-import { Crown, LockKeyhole, Settings, Trash2 } from "lucide-react";
+import { Crown, LockKeyhole, LucideIcon, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
