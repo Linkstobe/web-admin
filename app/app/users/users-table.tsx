@@ -2,6 +2,8 @@
 import ConfirmationModal from "@/components/confirmation-modal";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePermission } from "@/hook/use-permission";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +14,7 @@ import { ProjectService } from "@/services/project.service";
 import { UserService } from "@/services/user.service";
 import { Pagination, Stack } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-import { Crown, Settings } from "lucide-react";
+import { Crown, LockKeyhole, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -26,9 +28,18 @@ type TableMetrics = {
   userProjects: IProject[]
 }
 
+type SelectedActionIcon = {
+  delete: LucideIcon
+  block: LucideIcon
+}
+
 export default function UsersTable () {
   const { toast } = useToast()
   const { canEdit } = usePermission()
+
+  const [bulkModeEnable, setBulkModeEnable] = useState<boolean>(false)
+  const [selectedBulkAction, setSelectedBulkAction] = useState<string>("")
+  const [selectedUsersId, setSelectedUsersId] = useState<number[]>([])
 
   const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>([])
   const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
@@ -43,6 +54,14 @@ export default function UsersTable () {
 
   const handlePageChange = (event: any, page: number): void => {
     setCurrentPage(page)
+  }
+
+   const onSelecteUser = (projectId: number, isSelected: boolean) => {
+    setSelectedUsersId((prevSelected) =>
+      isSelected
+        ? [...prevSelected, projectId]
+        : prevSelected.filter((id: number) => id !== projectId)
+    )
   }
 
   const onFilterMetric = (value: string): void => {
@@ -61,12 +80,23 @@ export default function UsersTable () {
     setCurrentPage(1)
   }
 
+  const selectedActionIcon: SelectedActionIcon = {
+    delete: Trash2,
+    block: LockKeyhole 
+  }
+
   const projectDefaultImage = "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp"
   const roleStyle = {
     "basic": "bg-[#20B120]",
     "free": "bg-[#20B120]",
     "pro": "bg-[#164F62]",
     "premium": "bg-[#299FC7]",
+  }
+
+  const onResetBulkActions = () => {
+    setBulkModeEnable(false)
+    setSelectedBulkAction("")
+    setSelectedUsersId([])
   }
 
   const onGetAllUsers = async () => {
@@ -155,6 +185,64 @@ export default function UsersTable () {
   
   }
 
+  const onDeleteSelectedUsers = async () => {
+    try {
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao excluir usuários",
+          description: "Você não possui permissão para excluir usuários. Entre em contato com o administrador.",
+        })
+        return
+      }
+
+      const deletePromises = selectedUsersId.map((id) =>
+        UserService.deleteUserById(id)
+      )
+
+      await Promise.all(deletePromises)
+
+      toast({
+        variant: "success",
+        title: "Usuários excluídos!",
+        description: "Os usuários foram excluídos com sucesso.",
+      })
+    } catch (error) {
+      console.log("UsersTable", error)
+    } finally {
+      onResetBulkActions()
+    }
+  }
+
+  const onBlockSelectedUsers = async () => {
+    try {
+      const userCanEdit = canEdit()
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao bloquear usuários",
+          description: "Você não possui permissão para bloquear usuários. Entre em contato com o administrador.",
+        })
+        return
+      }
+
+      const blockPromises = selectedUsersId.map((id) => 
+        UserService.updateUserById(id, { blocked: true })
+      )
+
+      await Promise.all(blockPromises)
+
+      toast({
+        variant: "success",
+        title: "Usuários bloqueados!",
+        description: "Os usuários foram bloqueados com sucesso.",
+      })
+    } catch (error) {
+      console.log("UsersTable", error)
+    }
+  }
+
   useEffect(() => {
     onGetAllUsers()
   }, [])
@@ -170,6 +258,75 @@ export default function UsersTable () {
           placeholder="Buscar"
           onChange={onFilterMetric}
         />
+
+        <div
+          className="flex items-center gap-4"
+        >
+          {
+            bulkModeEnable &&
+            <div
+              className="flex gap-2"
+            >
+              <Table.TableTopButtonCancel 
+                onCancel={() => {
+                  setBulkModeEnable(false)
+                  setSelectedBulkAction("")
+                }}
+              />
+              
+              {
+                selectedBulkAction === "delete" &&
+                <Table.TopButtonConfirm 
+                  onConfirm={onDeleteSelectedUsers}
+                />
+              }
+
+              {
+                selectedBulkAction === "block" &&
+                <Table.TopButtonConfirm 
+                  onConfirm={onBlockSelectedUsers}
+                />
+              }
+
+            </div>
+          }
+
+          <Popover>
+            <PopoverTrigger>
+              <Table.TopButton
+                icon={selectedActionIcon[selectedBulkAction] || Settings}
+                className="text-white"
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-0 w-48"
+            >
+              <Button
+                variant="outline"
+                className="w-full text-start justify-start rounded-none text-[#767676]"
+                onClick={() => {
+                  setBulkModeEnable(true)
+                  setSelectedBulkAction("delete")
+                  setSelectedUsersId([])
+                }}
+              >
+                Excluir vários usuários
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="w-full text-start justify-start rounded-none text-[#767676]"
+                onClick={() => {
+                  setBulkModeEnable(true)
+                  setSelectedBulkAction("block")
+                  setSelectedUsersId([])
+                }}
+              >
+                Bloquear vários usuários
+              </Button>
+            </PopoverContent>
+          </Popover>
+        </div>
       </Table.TopSection>
 
       <Table.Content>
@@ -190,7 +347,29 @@ export default function UsersTable () {
               <Table.Row
                 key={index}
               >
-                <Table.BodyItem text={name} explanation={name} />
+                <Table.BodyItem>
+                  <div
+                    className="flex items-center gap-1"
+                  >
+                    {
+                      bulkModeEnable &&
+                      <Checkbox
+                        id={`${id}`}
+                        checked={selectedUsersId.includes(Number(id))}
+                        onCheckedChange={(isChecked: boolean) => {
+                          onSelecteUser(Number(id), isChecked);
+                        }}
+                      />
+                    }
+                    
+                    <Label
+                      htmlFor={`${id}`}
+                      className="text-xs"
+                    >
+                      {name}
+                    </Label>
+                  </div>
+                </Table.BodyItem>
                 <Table.BodyItem text={email} explanation={email} />
                 <Table.BodyItem text={cellphone} explanation={cellphone} />
                 <Table.BodyItem>
