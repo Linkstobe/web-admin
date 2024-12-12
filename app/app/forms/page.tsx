@@ -7,22 +7,26 @@ import { IProject } from "@/interfaces/IProjects";
 export default async function Forms () {
   const token = getCookie("authToken")
 
-  const formClicksMetrics: IMetric[] = []
-  const formAccessMetrics: IMetric[] = []
+  let formClicksMetrics: IMetric[] = []
+  let formAccessMetrics: IMetric[] = []
 
   let allProjects: IProject[] = []
   let allForms: IForm[] = [] 
 
   try {
     const formsUrl = `${process.env.NEXT_PUBLIC_API_URL}/forms`;
-    const metricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics`;
+    const formAccessMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/view:form`;
+    const formClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-Modelo padrão-`;
     const projectsUrl = `${process.env.NEXT_PUBLIC_API_URL}/projects`;
 
-    const [formsResponse, metricsResponse, projectsResponse] = await Promise.all([
+    const [formsResponse, formAccessMetricsResponse, formClicksMetricsResponse, projectsResponse] = await Promise.all([
       fetch(formsUrl, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-      fetch(metricsUrl, {
+      fetch(formAccessMetricsUrl, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(formClicksMetricsUrl, {
         headers: { Authorization: `Bearer ${token}` },
       }),
       fetch(projectsUrl, {
@@ -30,27 +34,18 @@ export default async function Forms () {
       }),
     ]);
 
-    if (!formsResponse.ok || !metricsResponse.ok) {
-    }
-
-    const [forms, metrics, projects]: [IForm[], IMetric[], IProject[]] = await Promise.all([
+    const [forms, formAccess, formClicks, projects]: 
+      [IForm[], IMetric[], IMetric[], IProject[]] = await Promise.all([
       formsResponse.json(),
-      metricsResponse.json(),
+      formAccessMetricsResponse.json(),
+      formClicksMetricsResponse.json(),
       projectsResponse.json()
     ]);
 
     allForms = forms
     allProjects = projects
-
-    metrics.forEach((metric) => {
-      const { link_type } = metric
-
-      if (link_type.startsWith("view:form")) {
-        formAccessMetrics.push(metric)
-      } else if (link_type.startsWith("click:panel-Modelo padrão-")) {
-        formClicksMetrics.push(metric)
-      }
-    })
+    formClicksMetrics = formClicks
+    formAccessMetrics = formAccess
 
   } catch (error) {
     console.log("Forms: ", error)
