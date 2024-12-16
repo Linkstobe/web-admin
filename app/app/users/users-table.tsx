@@ -208,6 +208,8 @@ export default function UsersTable () {
         title: "Usuários excluídos!",
         description: "Os usuários foram excluídos com sucesso.",
       })
+
+      await onGetAllUsers()
     } catch (error) {
       console.log("UsersTable", error)
     } finally {
@@ -238,8 +240,11 @@ export default function UsersTable () {
         title: "Usuários bloqueados!",
         description: "Os usuários foram bloqueados com sucesso.",
       })
+      await onGetAllUsers()
     } catch (error) {
       console.log("UsersTable", error)
+    } finally {
+      onResetBulkActions()
     }
   }
 
