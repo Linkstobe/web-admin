@@ -80,13 +80,13 @@ export default function ClickThroughRate ({
 
   useEffect(() => {
     const getPanelMetrics = async () => {
-      if (!panelsClicksMetrics) return
+      if (!panelsClicksMetrics || !panels || !projects) return
 
-      const validPanels = panels.filter(({ painel_style }) =>
-        ["link", "basic", "advanced"].includes(painel_style)
-      )
+      // const validPanels = panels.filter(({ painel_style }) =>
+      //   ["link", "basic", "advanced"].includes(painel_style)
+      // )
 
-      const panelMetrics = validPanels.map((panel, index) => {
+      const panelMetrics = panels.map((panel, index) => {
         const panelId = panel.id
           const clicks = panelsClicksMetrics.reduce((count, metric) => {
             const metricId = metric.link_type.split('-').pop()
@@ -104,7 +104,7 @@ export default function ClickThroughRate ({
     }
 
     getPanelMetrics()
-  }, [selectedProjectId, allClickMetrics, panelsClicksMetrics])
+  }, [selectedProjectId, allClickMetrics, panelsClicksMetrics, panels, projects])
 
   return (
     <div

@@ -11,43 +11,43 @@ export default async function LinkEngagement () {
   let projectAccessMetrics: IMetric[] = []
   let panelClicksMetrics: IMetric[] = []
 
-  let allProjects: IProject[] = []
-  let allPanels: IPainel[] = []
-  let allUsers: IUser[] = []
+  // let allProjects: IProject[] = []
+  // let allPanels: IPainel[] = []
+  // let allUsers: IUser[] = []
 
   try {
-    const projectsUrl = `${process.env.NEXT_PUBLIC_API_URL}/projects`;
-    const metricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics`;
-    const panelsUrl = `${process.env.NEXT_PUBLIC_API_URL}/painels`;
-    const usersUrl = `${process.env.NEXT_PUBLIC_API_URL}/users`;
+    // const projectsUrl = `${process.env.NEXT_PUBLIC_API_URL}/projects`;
+    // const metricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics`;
+    // const panelsUrl = `${process.env.NEXT_PUBLIC_API_URL}/painels`;
+    // const usersUrl = `${process.env.NEXT_PUBLIC_API_URL}/users`;
 
     const accessMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/origin:`;
-    const panelLinkClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-link:`;
-    const panelBasicClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-basic:`;
-    const panelAdvancedClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-advanced:`;
+    const panelLinkClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-link`;
+    const panelBasicClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-basic`;
+    const panelAdvancedClicksMetricsUrl = `${process.env.NEXT_PUBLIC_API_URL}/metrics/type/click:panel-advanced`;
 
     const [
-      projectsResponse,
+      // projectsResponse,
       // metricsResponse,
-      panelsResponse,
-      usersResponse,
+      // panelsResponse,
+      // usersResponse,
       accessResponse,
       panelLinkClicksResponse,
       panelBasicClicksResponse,
       panelAdvancedClicksResponse
     ] = await Promise.all([
-      fetch(projectsUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
+      // fetch(projectsUrl, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // }),
       // fetch(metricsUrl, {
       //   headers: { Authorization: `Bearer ${token}` }
       // }),
-      fetch(panelsUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      fetch(usersUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
+      // fetch(panelsUrl, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // }),
+      // fetch(usersUrl, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // }),
       fetch(accessMetricsUrl, {
         headers: { Authorization: `Bearer ${token}` }
       }),
@@ -63,10 +63,10 @@ export default async function LinkEngagement () {
     ])
 
     const requestFailed = 
-      !projectsResponse.ok ||
+      // !projectsResponse.ok ||
       // !metricsResponse.ok ||
-      !panelsResponse.ok ||
-      !usersResponse.ok ||
+      // !panelsResponse.ok ||
+      // !usersResponse.ok ||
       !accessResponse.ok ||
       !panelLinkClicksResponse.ok ||
       !panelBasicClicksResponse.ok ||
@@ -76,21 +76,21 @@ export default async function LinkEngagement () {
       throw new Error("Falha em uma ou mais requisições");
     }
 
-    const [projects, panels, users, access, panelLinkClicks, panelBasicClicks, panelAdvancedClicks]: 
-    [IProject[], IPainel[], IUser[], IMetric[], IMetric[], IMetric[], IMetric[]] = await Promise.all([
-      projectsResponse.json(),
+    const [access, panelLinkClicks, panelBasicClicks, panelAdvancedClicks]: 
+    [IMetric[], IMetric[], IMetric[], IMetric[]] = await Promise.all([
+      // projectsResponse.json(),
       // metricsResponse.json(),
-      panelsResponse.json(),
-      usersResponse.json(),
+      // panelsResponse.json(),
+      // usersResponse.json(),
       accessResponse.json(),
       panelLinkClicksResponse.json(),
       panelBasicClicksResponse.json(),
       panelAdvancedClicksResponse.json()
     ])
 
-    allProjects = projects
-    allPanels = panels
-    allUsers = users
+    // allProjects = projects
+    // allPanels = panels
+    // allUsers = users
     projectAccessMetrics = access
     panelClicksMetrics = [...panelLinkClicks, ...panelBasicClicks, ...panelAdvancedClicks]
 
@@ -116,11 +116,11 @@ export default async function LinkEngagement () {
 
   return (
     <LinkEngagementContent 
-      projects={allProjects}
+      // projects={allProjects}
       projectAccessMetrics={projectAccessMetrics}
       panelsClicksMetrics={panelClicksMetrics}
-      panels={allPanels}
-      users={allUsers}
+      // panels={allPanels}
+      // users={allUsers}
     />
   )
 }

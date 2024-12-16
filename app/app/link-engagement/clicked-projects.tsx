@@ -73,7 +73,7 @@ export default function ClickedProjects ({
   }, [])
 
   useEffect(() => {
-    if (!allMetrics || !allProjects) return
+    if (!allMetrics || !allProjects || !projects) return
 
     const now = new Date()
     const startDate = new Date()
@@ -96,7 +96,7 @@ export default function ClickedProjects ({
       .slice(0, 10)
 
     setClickedProjectMetrics(projectMetrics)
-  }, [allMetrics, allProjects, periodInDays.days])
+  }, [allMetrics, allProjects, periodInDays.days, projects])
 
   return (
     <div

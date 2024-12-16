@@ -13,5 +13,9 @@ export const MetricsServices = {
   async onGetAllMetricsByProjectId (id: string | number) {
     const { data } = await Api.get<IMetric[]>(`/metrics/project/${id}`)
     return data
+  },
+  async onGetAllMetricsByType (type: string) {
+    const { data } = await Api.get<IMetric[]>(`/metrics/type/${type}`)
+    return data
   }
 }

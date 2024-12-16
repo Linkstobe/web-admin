@@ -25,6 +25,8 @@ export default function ProjectEngagementCard ({
 
   useEffect(() => {
     const getProjectCreationMetrics = async () => {
+      if (!projects) return
+      
       const validProjects: IProject[] = projects.filter(({ linkstoBe }) =>
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
@@ -61,7 +63,7 @@ export default function ProjectEngagementCard ({
     }
 
     getProjectCreationMetrics()
-  }, [])
+  }, [projects])
 
   return (
     <div

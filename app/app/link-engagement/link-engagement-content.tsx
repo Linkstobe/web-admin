@@ -19,28 +19,37 @@ import CalendarDateRangePicker from "@/components/date-ranger-picker";
 import { IMetric } from "@/interfaces/IMetrics";
 import { IPainel } from "@/interfaces/IPanels";
 import { IUser } from "@/interfaces/IUser";
+import { ProjectService } from "@/services/project.service";
+import { UserService } from "@/services/user.service";
+import { PainelService } from "@/services/panel.service";
 
 interface LinkEngagementContentProps {
-  projects: IProject[]
+  // projects: IProject[]
   projectAccessMetrics: IMetric[]
   panelsClicksMetrics: IMetric[]
-  panels: IPainel[]
-  users: IUser[]
+  // panels: IPainel[]
+  // users: IUser[]
 }
 
 export default function LinkEngagementContent ({
-  projects,
+  // projects,
   projectAccessMetrics,
   panelsClicksMetrics,
-  panels,
-  users
+  // panels,
+  // users
 }: LinkEngagementContentProps) {
   const [date, setDate] = useState<DateRange | undefined>()
 
-  const [filteredProjects, setFilteredProjects] = useState<IProject[]>(projects)
+  const [allProjects, setAllProjects] = useState<IProject[]>([])
+  const [filteredProjects, setFilteredProjects] = useState<IProject[]>()
+
+  const [allUsers, setAllUsers] = useState<IUser[]>([])
+
+  const [allPanels, setAllPanels] = useState<IPainel[]>([])
+
   const [filteredPanelsClicksMetrics, setFilteredPanelsClicksMetrics] = useState<IMetric[]>(panelsClicksMetrics)
 
-  const [filteredProjectsToSelect, setFilteredProjectsToSelect] = useState<IProject[]>(projects)
+  const [filteredProjectsToSelect, setFilteredProjectsToSelect] = useState<IProject[]>(allProjects)
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
 
   const [value, setValue] = useState<string>("ruancordel")
@@ -59,11 +68,11 @@ export default function LinkEngagementContent ({
 
   const onFilterProject = (value: string): void => {
     if (value.trim() === "") {
-     setFilteredProjectsToSelect(projects) 
+     setFilteredProjectsToSelect(allProjects) 
      return
     }
 
-    const filteredData: IProject[] = projects.filter(({ linkstoBe }) => linkstoBe.includes(value))
+    const filteredData: IProject[] = allProjects.filter(({ linkstoBe }) => linkstoBe.includes(value))
 
     setFilteredProjectsToSelect(filteredData)
     setCurrentPage(1)
@@ -92,9 +101,45 @@ export default function LinkEngagementContent ({
     setFilteredPanelsClicksMetrics(validsPanelsClicksMetrics)
   }
 
+  const onGetUsers = async () => {
+    try {
+      const users = await UserService.getAllUsers()
+      setAllUsers(users)
+    } catch (error) {
+      console.log("LinkEngagementContent: ", error)
+    }
+  }
+
+  const onGetPanels = async () => {
+    try {
+      const panels = await PainelService.onGetAllPanels()
+      setAllPanels(panels)
+    } catch (error) {
+      console.log("LinkEngagementContent: ", error)
+    }
+  }
+
+  const onGetProjects = async () => {
+    try {
+      const projects = await ProjectService.getAllProject()
+      setAllProjects(projects)
+      setFilteredProjects(projects)
+      setFilteredProjectsToSelect(projects)
+      console.log({ projects })
+    } catch (error) {
+      console.log("LinkEngagementContent: ", error)
+    }
+  }
+
   useEffect(() => {
     onFilterMetrics()
   }, [date, selectedProject])
+
+  useEffect(() => {
+    onGetUsers()
+    onGetPanels()
+    onGetProjects()
+  }, [])
 
   return (
     <div
@@ -109,7 +154,7 @@ export default function LinkEngagementContent ({
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                role="combobox"
+                role=" "
                 className="justify-between"
               >
                 { value || "Selecione um projeto..."}
@@ -157,7 +202,7 @@ export default function LinkEngagementContent ({
                   >
                     <Stack>
                       <Pagination 
-                        count={Math.ceil(filteredProjects.length / projectsPerPage)} 
+                        count={Math.ceil(filteredProjects?.length / projectsPerPage)} 
                         page={currentPage}
                         onChange={handlePageChange}
                         variant="outlined" 
@@ -188,7 +233,7 @@ export default function LinkEngagementContent ({
       </div>
 
       <ProjectEngagementCard
-        projects={projects}
+        projects={allProjects}
       />
 
       <div
@@ -197,7 +242,7 @@ export default function LinkEngagementContent ({
         <div>
           <ClickedProjects 
             projectAccessMetrics={projectAccessMetrics}
-            projects={projects}
+            projects={allProjects}
           />
         </div>
 
@@ -218,16 +263,16 @@ export default function LinkEngagementContent ({
         <div>
           <ClickThroughRate 
             panelsClicksMetrics={filteredPanelsClicksMetrics}
-            projects={projects}
-            panels={panels}
+            projects={allProjects}
+            panels={allPanels}
           />
         </div>
       </div>
 
       <div>
         <NewLinkSourceTable 
-          projects={projects}
-          users={users}
+          projects={allProjects}
+          users={allUsers}
         />
       </div>
     </div>  

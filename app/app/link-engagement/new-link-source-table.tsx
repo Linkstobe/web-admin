@@ -64,6 +64,7 @@ export default function NewLinkSourceTable({
 
   useEffect(() => {
     const getNewProjectMetrics = async () => {
+      if (!projects || !users) return
       const validProjects = projects.filter(({ linkstoBe }) => 
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
@@ -89,7 +90,7 @@ export default function NewLinkSourceTable({
     }
 
     getNewProjectMetrics()
-  }, [])
+  }, [projects, users])
 
   const firstTableMetrics = filteredTableMetrics.slice(
     (currentPage - 1) * metricsPerPage,
