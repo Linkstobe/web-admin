@@ -176,6 +176,7 @@ export default function UsersTable () {
 
       await onGetAllUsers()
     } catch (error) {
+      console.log("UsersTable: ", error)
       toast({
         variant: "destructive",
         title: "Erro ao bloquear usuário",
@@ -212,6 +213,11 @@ export default function UsersTable () {
       await onGetAllUsers()
     } catch (error) {
       console.log("UsersTable", error)
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir usuários",
+        description: "Ocorreu um erro ao excluir os usuários. Tente novamente.",
+      })
     } finally {
       onResetBulkActions()
     }
@@ -243,6 +249,11 @@ export default function UsersTable () {
       await onGetAllUsers()
     } catch (error) {
       console.log("UsersTable", error)
+      toast({
+        variant: "destructive",
+        title: "Erro ao bloquear usuário",
+        description: "Ocorreu um erro ao bloquear os usuários. Tente novamente.",
+      })
     } finally {
       onResetBulkActions()
     }
