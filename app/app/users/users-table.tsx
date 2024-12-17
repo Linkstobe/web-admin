@@ -201,7 +201,7 @@ export default function UsersTable () {
         UserService.deleteUserById(id)
       )
 
-      await Promise.all(deletePromises)
+      await Promise.allSettled(deletePromises)
 
       toast({
         variant: "success",
@@ -233,7 +233,7 @@ export default function UsersTable () {
         UserService.updateUserById(id, { blocked: true })
       )
 
-      await Promise.all(blockPromises)
+      await Promise.allSettled(blockPromises)
 
       toast({
         variant: "success",
