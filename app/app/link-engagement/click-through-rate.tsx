@@ -75,8 +75,7 @@ export default function ClickThroughRate ({
     "hsl(280, 70%, 50%)",
   ]
 
-  const getColor = (index: number) =>
-    colorPalette[index % colorPalette.length]
+  const getColor = (index: number) => colorPalette[index % colorPalette.length]
 
   useEffect(() => {
     const getPanelMetrics = async () => {

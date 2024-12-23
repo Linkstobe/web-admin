@@ -29,7 +29,7 @@ export const ProjectService = {
     return data
   },
   async getAllProject () {
-    const { data } = await Api.get("/projects")
+    const { data } = await Api.get<IProject[]>("/projects")
     return data
   }
 };

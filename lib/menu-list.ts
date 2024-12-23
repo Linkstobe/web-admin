@@ -71,6 +71,13 @@ export function handleGetMenuList(pathname: string): Group[] {
           subMenus: []
         },
         {
+          href: "/app/panels",
+          label: "Engajamento - Painéis",
+          active: pathname.includes("/app/panels/"),
+          icon: Server,
+          subMenus: []
+        },
+        {
           href: "/app/reports",
           label: "Relatórios",
           active: pathname.includes("/app/reports"),
@@ -116,16 +123,16 @@ export function handleGetMenuList(pathname: string): Group[] {
       groupLabel: 'Biblioteca',
       menus: [
         {
-          href: "/app/templates",
+          href: "/app/templates-library",
           label: "Templates",
-          active: pathname.includes("/templates"),
+          active: pathname.includes("/app/templates-library"),
           icon: PanelTop,
           subMenus: []
         },
         {
-          href: "/app/buttons",
-          label: "Botões",
-          active: pathname.includes("/buttons"),
+          href: "/app/panels-library",
+          label: "Painéis",
+          active: pathname.includes("/app/panels-library"),
           icon: Server,
           subMenus: []
         },

@@ -22,19 +22,20 @@ import { IUser } from "@/interfaces/IUser";
 import { ProjectService } from "@/services/project.service";
 import { UserService } from "@/services/user.service";
 import { PainelService } from "@/services/panel.service";
+import { MetricsServices } from "@/services/metrics.service";
 
 interface LinkEngagementContentProps {
   // projects: IProject[]
-  projectAccessMetrics: IMetric[]
-  panelsClicksMetrics: IMetric[]
+  // projectAccessMetrics: IMetric[]
+  // panelsClicksMetrics: IMetric[]
   // panels: IPainel[]
   // users: IUser[]
 }
 
 export default function LinkEngagementContent ({
   // projects,
-  projectAccessMetrics,
-  panelsClicksMetrics,
+  // projectAccessMetrics,
+  // panelsClicksMetrics,
   // panels,
   // users
 }: LinkEngagementContentProps) {
@@ -44,10 +45,11 @@ export default function LinkEngagementContent ({
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>()
 
   const [allUsers, setAllUsers] = useState<IUser[]>([])
-
   const [allPanels, setAllPanels] = useState<IPainel[]>([])
+  const [allAccessMetrics, setAllAccessMetrics] = useState<IMetric[]>([])
 
-  const [filteredPanelsClicksMetrics, setFilteredPanelsClicksMetrics] = useState<IMetric[]>(panelsClicksMetrics)
+  const [allClicksMetrics, setAllClicksMetrics] = useState<IMetric[]>([])
+  const [filteredPanelsClicksMetrics, setFilteredPanelsClicksMetrics] = useState<IMetric[]>(allClicksMetrics)
 
   const [filteredProjectsToSelect, setFilteredProjectsToSelect] = useState<IProject[]>(allProjects)
   const [selectedProject, setSelectedProject] = useState<number | null>(1);
@@ -79,7 +81,7 @@ export default function LinkEngagementContent ({
   }
 
   const onFilterMetrics = () => {
-    let validsPanelsClicksMetrics: IMetric[] = panelsClicksMetrics
+    let validsPanelsClicksMetrics: IMetric[] = allClicksMetrics
    
     if (selectedProject) {
       validsPanelsClicksMetrics = validsPanelsClicksMetrics.filter(
@@ -125,7 +127,30 @@ export default function LinkEngagementContent ({
       setAllProjects(projects)
       setFilteredProjects(projects)
       setFilteredProjectsToSelect(projects)
-      console.log({ projects })
+    } catch (error) {
+      console.log("LinkEngagementContent: ", error)
+    }
+  }
+
+  const onGetPanelClicksMetrics = async () => {
+    try {
+      const linkPanelClick = await MetricsServices.onGetAllMetricsByType("click:panel-link")
+      const basicPanelClick = await MetricsServices.onGetAllMetricsByType("click:panel-basic")
+      const advancedPanelClick = await MetricsServices.onGetAllMetricsByType("click:panel-advanced")
+
+      const clicksMetrics = [...linkPanelClick, ...basicPanelClick, ...advancedPanelClick]
+
+      setAllClicksMetrics(clicksMetrics)
+      setFilteredPanelsClicksMetrics(clicksMetrics)
+    } catch (error) {
+      console.log("LinkEngagementContent: ", error)
+    }
+  }
+
+  const onGetAccessMetrics = async () => {
+    try {
+      const accessMetrics = await MetricsServices.onGetAllMetricsByType("origin:")
+      setAllAccessMetrics(accessMetrics)
     } catch (error) {
       console.log("LinkEngagementContent: ", error)
     }
@@ -139,6 +164,8 @@ export default function LinkEngagementContent ({
     onGetUsers()
     onGetPanels()
     onGetProjects()
+    // onGetPanelClicksMetrics()
+    onGetAccessMetrics()
   }, [])
 
   return (
@@ -237,35 +264,35 @@ export default function LinkEngagementContent ({
       />
 
       <div
-        className="grid grid-cols-[2fr_1fr] gap-4"
+        className="grid grid-cols-1 gap-4"
       >
         <div>
           <ClickedProjects 
-            projectAccessMetrics={projectAccessMetrics}
+            projectAccessMetrics={allAccessMetrics}
             projects={allProjects}
           />
         </div>
 
-        <div
+        {/* <div
           className="h-full"
         >
           <EngagementFunnel />
-        </div>
+        </div> */}
       </div>
 
       <div
         className="grid grid-cols-2 gap-4"
       >
-        <div>
+        {/* <div>
           <AverageTimeOnPage />
-        </div>
+        </div> */}
 
         <div>
-          <ClickThroughRate 
+          {/* <ClickThroughRate 
             panelsClicksMetrics={filteredPanelsClicksMetrics}
             projects={allProjects}
             panels={allPanels}
-          />
+          /> */}
         </div>
       </div>
 

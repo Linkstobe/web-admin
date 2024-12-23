@@ -34,34 +34,23 @@ export default function ClickedProjects ({
   
   const handlePeriodChange = (value: string) => {
     switch (value) {
-      case 'Dia':
-        setPeriodInDays({
-          days: 1,
-          name: "Dia"
-        })
-        break
-      case 'Semana':
-        setPeriodInDays({
-          days: 7,
-          name: "Semana"
-        })
-        break
-      case 'Mês':
-        setPeriodInDays({
-          days: 30,
-          name: "Mês"
-        })
-        break
-      case 'Ano':
-        setPeriodInDays({
-          days: 365,
-          name: "Ano"
-        })
-        break
+      case "Dia":
+        setPeriodInDays({ days: 1, name: "Dia" });
+        break;
+      case "Semana":
+        setPeriodInDays({ days: 7, name: "Semana" });
+        break;
+      case "Mês":
+        setPeriodInDays({ days: 30, name: "Mês" });
+        break;
+      case "Ano":
+        setPeriodInDays({ days: 365, name: "Ano" });
+        break;
       default:
-        setPeriodInDays(null)
+        // Não altera o estado se o valor for inválido
+        break;
     }
-  }
+  };
 
   useEffect(() => {
     const fetchMetricsAndProjects = () => {
@@ -73,30 +62,31 @@ export default function ClickedProjects ({
   }, [])
 
   useEffect(() => {
-    if (!allMetrics || !allProjects || !projects) return
+    if (!allMetrics || !allProjects || !periodInDays || !projectAccessMetrics) return;
 
-    const now = new Date()
-    const startDate = new Date()
-    startDate.setDate(now.getDate() - periodInDays.days)
+    const now = new Date();
+    const startDate = new Date();
+    startDate.setDate(now.getDate() - periodInDays.days);
+
 
     const filteredMetrics = projectAccessMetrics.filter(({ createdAt }) => {
-      const metricDate = new Date(createdAt)
-      return metricDate >= startDate && metricDate <= now
-    })
+      const metricDate = new Date(createdAt);
+      return metricDate >= startDate && metricDate <= now;
+    });
 
-    const projectMetrics: ClickedProjectMetric[] = allProjects.map(({ id, linkstoBe }) => {
-      const metricCount = filteredMetrics.filter(({ user_id }) => user_id === id).length
+    const projectMetrics: ClickedProjectMetric[] = projects
+      .map(({ id, linkstoBe }) => {
+        console.log()
+        const metricCount = filteredMetrics.filter(({ user_id }) => user_id === id).length;
 
-      return {
-        name: linkstoBe,
-        acessos: metricCount,
-      }
-    })
+        return { name: linkstoBe, acessos: metricCount };
+      })
       .sort((a, b) => b.acessos - a.acessos)
-      .slice(0, 10)
+      .slice(0, 10);
 
-    setClickedProjectMetrics(projectMetrics)
-  }, [allMetrics, allProjects, periodInDays.days, projects])
+    
+    setClickedProjectMetrics(projectMetrics);
+  }, [allMetrics, allProjects, periodInDays, projects, projectAccessMetrics]);
 
   return (
     <div

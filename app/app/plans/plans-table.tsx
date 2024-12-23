@@ -72,14 +72,21 @@ export function PlansTable() {
   }
   
   const getAllProject = async () => {
+    const accountWithTemplateId = 1425
+    const projectWithAdvancedPanels = 1499
+    const projectWithBasicPanels = 1500
     const projects = await ProjectService.getAllProject()
     const validProjects = projects
-      .filter(({ linkstoBe }) => 
+      .filter(({ linkstoBe, user_id, id }) => 
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe") &&
         !linkstoBe.includes("basic_buttons") &&
-        !linkstoBe.includes("custom_panel") 
+        !linkstoBe.includes("custom_panel") &&
+        user_id !== accountWithTemplateId &&
+        id !== projectWithAdvancedPanels &&
+        id !== projectWithBasicPanels &&
+        id !== 1495
       )
 
     const users = await UserService.getAllUsers()

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { ProjectService } from "@/services/project.service"
 import { Pagination, PaginationItem, Stack } from "@mui/material"
+import LineChart from "@/components/line-chart"
 
 export default function ReportContent () {
   const [allMetrics, setAllMetrics] = useState<IMetric[]>([])
@@ -28,9 +29,16 @@ export default function ReportContent () {
   const [date, setDate] = useState<DateRange | undefined>()
 
   const [accessesMetrics, setAccessesMetrics] = useState<IMetric[]>()
+  const [allAccessesMetrics, setAllAccessesMetrics] = useState<IMetric[]>()
+
   const [clicksMetrics, setClicksMetrics] = useState<IMetric[]>()
+  const [allClicksMetrics, setAllClicksMetrics] = useState<IMetric[]>()
+
   const [socialMediaAccessesMetrics, setSocialMediaAccessesMetrics] = useState<IMetric[]>()
+  const [allSocialMediaAccessesMetrics, setAllSocialMediaAccessesMetrics] = useState<IMetric[]>()
+
   const [locationMetrics, setLocationMetrics] = useState<IMetric[]>()
+  const [allLocationMetrics, setAllLocationMetrics] = useState<IMetric[]>()
 
   const [allProjects, setAllProjects] = useState<IProject[]>([])
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
@@ -65,32 +73,24 @@ export default function ReportContent () {
   useEffect(() => {
     const getAllMetrics = async () => {
       try {
-        const metrics: IMetric[] = await MetricsServices.onGetAllMetrics()
-
-        const accesses: IMetric[] = []
-        const clicks: IMetric[] = []
-        const socialMediaAccesses: IMetric[] = []
-        const locations: IMetric[] = []
-
-        metrics.forEach((metric) => {
-          const { link_type } = metric
-
-          if (link_type.startsWith("origin:")) {
-            accesses.push(metric)
-          } else if (link_type.startsWith("click:")) {
-            clicks.push(metric)
-          } else if (link_type.startsWith("access:")) {
-            socialMediaAccesses.push(metric)
-          } else if (link_type.startsWith("location:")) {
-            locations.push(metric)
-          }
-        })
+        const [accesses, clicks, socialMediaAccesses, locations] = await Promise.all([
+          MetricsServices.onGetAllMetricsByType("origin:"),
+          MetricsServices.onGetAllMetricsByType("click:"),
+          MetricsServices.onGetAllMetricsByType("access:"),
+          MetricsServices.onGetAllMetricsByType("location:")
+        ]);
 
         setAccessesMetrics(accesses)
+        setAllAccessesMetrics(accesses)
+
         setClicksMetrics(clicks)
+        setAllClicksMetrics(clicks)
+
         setSocialMediaAccessesMetrics(socialMediaAccesses)
+        setAllSocialMediaAccessesMetrics(socialMediaAccesses)
+
         setLocationMetrics(locations)
-        setAllMetrics(metrics)
+        setAllLocationMetrics(locations)
       } catch (error) {
         console.log("ReportContent: ", error)
       }
@@ -114,50 +114,53 @@ export default function ReportContent () {
   }, [])
 
   useEffect(() => {
-    const accesses: IMetric[] = []
-    const clicks: IMetric[] = []
-    const socialMediaAccesses: IMetric[] = []
-    const locations: IMetric[] = []
+    const onFilterMetrics = () => {
+      let accesses = [...(allAccessesMetrics || [])]
+      let clicks = [...(allClicksMetrics || [])]
+      let socialMediaAccesses = [...(allSocialMediaAccessesMetrics || [])]
+      let locations = [...(allLocationMetrics || [])]
 
-    let metricsToFilter = allMetrics
-
-    if (selectedProject) {
-      metricsToFilter = metricsToFilter.filter((metric) => Number(metric.user_id) === Number(selectedProject))
-    }
-
-    if (date?.from) {
-      const start = new Date(date.from)
-      const end = date.to ? new Date(date.to) : new Date(date.from)
-
-      end.setHours(23, 59, 59, 999)
-
-      metricsToFilter = metricsToFilter.filter((metric) => {
-        const metricDate = new Date(metric.createdAt)
-        return metricDate >= start && metricDate <= end
-      })
-    }
-
-    metricsToFilter.forEach((metric) => {
-      const { link_type } = metric
-
-      if (link_type.startsWith("origin:")) {
-        accesses.push(metric)
-      } else if (link_type.startsWith("click:")) {
-        clicks.push(metric)
-      } else if (link_type.startsWith("access:")) {
-        socialMediaAccesses.push(metric)
-      } else if (link_type.startsWith("location:")) {
-        locations.push(metric)
+      // Filtro por projeto
+      if (selectedProject) {
+        accesses = accesses.filter((metric) => Number(metric.user_id) === Number(selectedProject))
+        clicks = clicks.filter((metric) => Number(metric.user_id) === Number(selectedProject))
+        socialMediaAccesses = socialMediaAccesses.filter((metric) => Number(metric.user_id) === Number(selectedProject))
+        locations = locations.filter((metric) => Number(metric.user_id) === Number(selectedProject))
       }
-    })
 
-    setAccessesMetrics(accesses)
-    setClicksMetrics(clicks)
-    setSocialMediaAccessesMetrics(socialMediaAccesses)
-    setLocationMetrics(locations)
-    setFilteredMetrics(metricsToFilter)
-  }, [date, allMetrics, selectedProject])
+      // Filtro por data
+      if (date?.from) {
+        const start = new Date(date.from)
+        const end = date.to ? new Date(date.to) : new Date(date.from)
+        end.setHours(23, 59, 59, 999)
 
+        accesses = accesses.filter((metric) => {
+          const metricDate = new Date(metric.createdAt)
+          return metricDate >= start && metricDate <= end
+        })
+        clicks = clicks.filter((metric) => {
+          const metricDate = new Date(metric.createdAt)
+          return metricDate >= start && metricDate <= end
+        })
+        socialMediaAccesses = socialMediaAccesses.filter((metric) => {
+          const metricDate = new Date(metric.createdAt)
+          return metricDate >= start && metricDate <= end
+        })
+        locations = locations.filter((metric) => {
+          const metricDate = new Date(metric.createdAt)
+          return metricDate >= start && metricDate <= end
+        })
+      }
+
+      // Atualiza os estados filtrados
+      setAccessesMetrics(accesses)
+      setClicksMetrics(clicks)
+      setSocialMediaAccessesMetrics(socialMediaAccesses)
+      setLocationMetrics(locations)
+    }
+
+    onFilterMetrics()
+  }, [date, selectedProject, allAccessesMetrics, allClicksMetrics, allSocialMediaAccessesMetrics, allLocationMetrics])
 
   return (
     <div
@@ -266,7 +269,6 @@ export default function ReportContent () {
         />
       </div>
 
-    
       <AccessesPerDay 
         accessMetrics={accessesMetrics}
         clicksMetrics={clicksMetrics}

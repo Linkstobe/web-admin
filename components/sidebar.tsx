@@ -27,7 +27,7 @@ export default function Sidebar () {
           className="flex p-2 pb-5 border-b border-b-zinc-100 cursor-pointer"
         >
           <Link
-            href="/dashboard"
+            href="/app"
           >
             <Image
               src={`/images/${!sidebar?.isOpen ? 'short-' : ''}light-logo.png`}

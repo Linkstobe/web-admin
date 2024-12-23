@@ -17,6 +17,13 @@ export interface IProject {
   role?: string
   referral_id: string
   blocked: boolean
+  config?: object
+  title_classname?: string
+  description_classname?: string
+  hasCover?: boolean
+  background_image?: string
+  background_color?: string
+  background_effect?: string
 }
 
 export interface IUpdateProject extends Partial<IProject> {}
@@ -35,4 +42,5 @@ export interface ICreateProject {
   }[];
   arquived: boolean;
   blocked: boolean
+  config?: object
 }

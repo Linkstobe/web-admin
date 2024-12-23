@@ -101,7 +101,7 @@ export default function UsersTable () {
 
   const onGetAllUsers = async () => {
     const users: IUser[] = await UserService.getAllUsers()
-    const projects: IProject[] = await ProjectService.getAllProject()      
+    const projects: IProject[] = await ProjectService.getAllProject()
 
     const tableValues: TableMetrics[] = users.map(user => {
       const userProjects = projects.filter(project => project.user_id === user.id);

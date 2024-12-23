@@ -13,7 +13,7 @@ export const PainelService = {
   },
 
   async onGetAllPanels () {
-    const { data } = await Api.get("/painels")
+    const { data } = await Api.get<IPainel[]>("/painels")
     return data
   },
 

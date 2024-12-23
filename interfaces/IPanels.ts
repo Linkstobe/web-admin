@@ -11,7 +11,7 @@ export interface ICreatePanel {
   button_url: string
   button_color: string
   button_classname: string
-  arquived: true
+  arquived: boolean
   arquivedToFalse: string
   arquivedToTrue: string
   text_position: string
