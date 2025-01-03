@@ -56,9 +56,11 @@ export default function TemplatesLibrary () {
   const [imageUploadModalIsOpen, setImageUploadModalIsOpen] = useState<boolean>(false)
 
   const [selectedTypeToLink, setSelectedTypeToLink] = useState<string>("Avançados")
-  const typesOfPanelsToLink = ["Avançados", "Música/Vídeo"]
+  const typesOfPanelsToLink = ["Avançados", "Música/Vídeo", "Básicos"]
   const [filteredTypesOfPanelsToLink, setFilteredTypesOfPanelsToLink] = useState<string[]>(typesOfPanelsToLink)
   const [selectedMediasToLink, setSelectedMediasToLink] = useState<string[]>([])
+
+  const [basicButtonsModels, setBasicButtonsModels] = useState<IPainel[]>([])
 
   const [advancedPanelsModels, setAdvancedPanelsModels] = useState<IPainel[]>([])
   const [advancedPanelsModelsCurrentPage, setAdvancedPanelsModelsCurrentPage] = useState<number>(1)
@@ -185,9 +187,16 @@ export default function TemplatesLibrary () {
 
   const onGetPanelsModels = async () => {
     try {
+      const projectWithBasicButtons = 1130
+
       const allAdvancedPanelsModels = await PainelService.getPainelByProjectId(projectWithAllAdvancedPanels)
       const validAdvancedPanelsModels = allAdvancedPanelsModels.filter(({ productsArray }) => !productsArray[0]?.isModel)
       const ordenedAdvancedPanelsModels = validAdvancedPanelsModels.sort((a, b) => a.order_id - b.order_id);
+
+      const allBasicButtons = await PainelService.getPainelByProjectId(projectWithBasicButtons)
+      const validBasicButtonsModels = allBasicButtons.filter((panel) => panel.productsArray[0]?.demonstrationPanelImage)
+
+      setBasicButtonsModels(validBasicButtonsModels)
 
       setAdvancedPanelsModels(ordenedAdvancedPanelsModels)
       setSelectedPanelToLinkId(ordenedAdvancedPanelsModels[0].id)
@@ -250,14 +259,14 @@ export default function TemplatesLibrary () {
 
       const project = await ProjectService.getProjectById(id)
 
-      await ProjectService.updateProjectById(id, {
-        config: {
-          ...project.config,
-          isTemplate: false,
-        }
-      })
+      // await ProjectService.updateProjectById(id, {
+      //   config: {
+      //     ...project.config,
+      //     isTemplate: false,
+      //   }
+      // })
 
-      // await ProjectService.deleteProjectByID(id)
+      await ProjectService.deleteProjectByID(id)
 
       toast({
         variant: "success",
@@ -360,7 +369,7 @@ export default function TemplatesLibrary () {
           themeColor: templateBackgroundImageUrl ? "" : templateBackgroundColor,
 
           selectedLinkPanelId: selectedPanelToLinkId, // devemos passar o id do painel usado
-          selectedLinkPanelType: selectedPanelToLinkType, //tipo do painel escolhido, hoje só temos avançados
+          selectedLinkPanelType: selectedPanelToLinkType, //tipo do painel escolhido, hoje temos avançados e básicos
           panelBackgroundColor: "rgba(0,0,0,1)", //para personalizado talvez básico
           panelTextColor: "rgba(255,255,255,1)", //para personalizado talvez básico
           panelIdLinkedToTemplate: selectedPanelToLinkId,
@@ -416,6 +425,9 @@ export default function TemplatesLibrary () {
     onGetTemplates()
   }, [])
 
+
+  // TO DO
+  // Colocar um cor de background e cor como config de um painel ou de projeto, teria que colocar em vários lugares
 
   return (
     <div
@@ -701,15 +713,32 @@ export default function TemplatesLibrary () {
                       advancedPanelsModels
                         .filter(({ id }) => id === selectedPanelToLinkId)
                         .map(({ id, background_url, button_url }) => (
-                        <div 
-                          className="relative w-full rounded-xl aspect-[800/250] border"
-                          key={id}
-                        >
-                          <img src={background_url} alt="" className="absolute w-full h-full rounded-lg z-1" />
-                          <img src={secondLayerImageUrl} alt="" className="absolute h-full w-2/5 object-cover rounded-lg z-[2]" />
-                          <img src={button_url} alt="" className="absolute w-full h-full rounded-lg z-[3]" />
-                        </div>
-                      ))
+                          <div 
+                            className="relative w-full rounded-xl aspect-[800/250]"
+                            key={id}
+                          >
+                            <img src={background_url} alt="" className="absolute w-full h-full rounded-lg z-1" />
+                            <img src={secondLayerImageUrl} alt="" className="absolute h-full w-2/5 object-cover rounded-lg z-[2]" />
+                            <img src={button_url} alt="" className="absolute w-full h-full rounded-lg z-[3]" />
+                          </div>
+                        ))
+                    }
+
+                    {
+                      basicButtonsModels
+                        .filter(({ id }) => id === selectedPanelToLinkId)
+                        .map(({ id, productsArray }) => (
+                          <div 
+                            className="relative w-full rounded-xl aspect-[800/250] h-full"
+                            key={id}
+                          >
+                            <img 
+                              src={productsArray[0].demonstrationPanelImage} 
+                              alt=""
+                              className="w-full object-cover rounded-sm"
+                            />
+                          </div>
+                        ))
                     }
 
                     {
@@ -1051,6 +1080,45 @@ export default function TemplatesLibrary () {
                       size={35}
                     />
                   </div>
+                </div>
+              </div>
+            }
+
+            {
+              selectedTypeToLink === "Básicos" &&
+              <div
+                className="w-full flex flex-col gap-2 px-2"
+              >
+                <h2
+                className="font-medium text-zinc-600"
+                >
+                  Selecione o painel
+                </h2>
+
+                <div
+                  className="grid grid-cols-3 gap-2"
+                >
+                  {
+                    basicButtonsModels.map(({ id, painel_style, productsArray }, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "border-2 p-1 rounded-sm border-dashed cursor-pointer",
+                          selectedPanelToLinkId === id  ? "border-fuchsia-600" : ""
+                        )}
+                        onClick={() => {
+                          setSelectedPanelToLinkId(id)
+                          setSelectedPanelToLinkType(painel_style)
+                        }}
+                      >
+                        <img 
+                          src={productsArray[0].demonstrationPanelImage} 
+                          alt="" 
+                          className="w-full object-cover rounded-sm"
+                        />
+                      </div>
+                    ))
+                  }
                 </div>
               </div>
             }
@@ -1920,6 +1988,24 @@ export default function TemplatesLibrary () {
                                   </div>
                                 ))
                               }
+
+                              {
+                                basicButtonsModels
+                                  .filter(({ id }) => id === selectedPanelToLinkId)
+                                  .map(({ id, productsArray }) => (
+                                    <div 
+                                      className="relative rounded-xl w-20 aspect-[800/250] h-full"
+                                      key={id}
+                                    >
+                                      <img 
+                                        src={productsArray[0].demonstrationPanelImage} 
+                                        alt=""
+                                        className="w-full object-cover rounded-sm"
+                                      />
+                                    </div>
+                                  ))
+                              }
+
                             </div>
                           </div>
 
