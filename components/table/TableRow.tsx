@@ -1,16 +1,17 @@
 "use client"
 
-import { ReactNode } from "react"
+import { HTMLAttributes, ReactNode } from "react"
 
-interface TableRowProps {
+interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   children: ReactNode
 }
 
 export default function TableRow ({
-  children
+  children,
+  ...rest
 }: TableRowProps) {
   return (
-    <tr>
+    <tr {...rest}>
       { children }
     </tr>
   )

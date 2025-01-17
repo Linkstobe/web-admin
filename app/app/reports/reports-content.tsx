@@ -315,7 +315,7 @@ export default function ReportContent () {
         />
       </div>
 
-      <AccessesPerDay 
+      {/* <AccessesPerDay 
         accessMetrics={accessesMetrics}
         clicksMetrics={clicksMetrics}
         dateRange={date}
@@ -337,9 +337,9 @@ export default function ReportContent () {
         <AccessesToSocialMedia 
           socialMediaAccessesMetrics={socialMediaAccessesMetrics}
         />
-      </div> 
+      </div>  */}
 
-      <div
+      {/* <div
         className="grid grid-cols-2 gap-4 bg-white rounded-lg shadow-lg p-4"
       >
         <AccessesByState
@@ -349,7 +349,7 @@ export default function ReportContent () {
         <AccessesByCountry 
           locationMetrics={locationMetrics}
         />
-      </div>
+      </div> */}
 
       <div
         className="grid grid-cols-2 gap-4 bg-white rounded-lg shadow-lg p-4"
@@ -367,8 +367,10 @@ export default function ReportContent () {
 
       <div>
         <NewLinkSourceTable
-          projects={allProjects}
+          allProjects={allProjects}
+          projects={filteredAllNewProjects}
           users={allUsers}
+          selectedProject={selectedProject}
         />
       </div>
     </div>

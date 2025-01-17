@@ -15,18 +15,23 @@ import { cn } from "@/lib/utils"
 
 interface NewLinkSourceTableProps {
   projects: IProject[]
+  allProjects: IProject[]
   users: IUser[]
+  selectedProject: string | number
 }
 
 type TableMetrics = {
   linkstoBe: string
   newLinks: IProject[]
   userName: string
+  projectId: number
 }
 
 export default function NewLinkSourceTable({
   projects,
-  users
+  users,
+  selectedProject,
+  allProjects
 }: NewLinkSourceTableProps) {
   const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>([])
   const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
@@ -64,14 +69,14 @@ export default function NewLinkSourceTable({
 
   useEffect(() => {
     const getNewProjectMetrics = async () => {
-      if (!projects || !users) return
+      if (!projects || !users || !allProjects) return
       const validProjects = projects.filter(({ linkstoBe }) => 
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe")
       )
 
-      const projectMetrics: TableMetrics[] = validProjects.map((project) => {
+      const projectMetrics: TableMetrics[] = allProjects.map((project) => {
         const relatedProjects = validProjects.filter(
           (p) => Number(p.referral_id) === Number(project.id)
         )
@@ -82,15 +87,22 @@ export default function NewLinkSourceTable({
           linkstoBe: project.linkstoBe,
           newLinks: relatedProjects,
           userName: user.name,
+          projectId: project.id
         }
       }).sort((a, b) => b.newLinks.length - a.newLinks.length)
+
+      if (selectedProject !== null) {
+        setTableMetrics(projectMetrics.filter(({ projectId }) => Number(projectId) === Number(selectedProject)))
+        setFilteredTableMetrics(projectMetrics.filter(({ projectId }) => Number(projectId) === Number(selectedProject)))
+        return
+      }
 
       setTableMetrics(projectMetrics)
       setFilteredTableMetrics(projectMetrics)
     }
 
     getNewProjectMetrics()
-  }, [projects, users])
+  }, [projects, users, selectedProject])
 
   const firstTableMetrics = filteredTableMetrics.slice(
     (currentPage - 1) * metricsPerPage,
@@ -122,69 +134,74 @@ export default function NewLinkSourceTable({
             </Table.Row>
           </Table.HeaderSection>
           <Table.BodySection>
-            {firstTableMetrics.map(({ linkstoBe, newLinks, userName }, index) => (
-              <Table.Row key={`first-table-${index}`}>
-                <Table.BodyItem text={`${(currentPage - 1) * metricsPerPage + index + 1}°`} />
-                <Table.BodyItem text={userName} />
-                <Table.BodyItem>
-                  <Link
-                    href={"https://linksto.be/" + linkstoBe}
-                    className="underline text-[#164F62] font-semibold"
-                    target="_blank"
+            {
+              firstTableMetrics
+                .map(({ linkstoBe, newLinks, userName, projectId }, index) => (
+                  <Table.Row 
+                    key={`first-table-${index}`}
                   >
-                    { linkstoBe }
-                  </Link>
-                </Table.BodyItem>
-                <Table.BodyItem text={newLinks.length.toString()} />
-                <Table.BodyItem
-                  className="text-end"
-                >
-                  <Popover>
-                    <PopoverTrigger>
-                      <List />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="flex flex-col gap-2"
+                    <Table.BodyItem text={`${(currentPage - 1) * metricsPerPage + index + 1}°`} />
+                    <Table.BodyItem text={userName} />
+                    <Table.BodyItem>
+                      <Link
+                        href={"https://linksto.be/" + linkstoBe}
+                        className="underline text-[#164F62] font-semibold"
+                        target="_blank"
+                      >
+                        { linkstoBe }
+                      </Link>
+                    </Table.BodyItem>
+                    <Table.BodyItem text={newLinks.length.toString()} />
+                    <Table.BodyItem
+                      className="text-end"
                     >
-                      {
-                        newLinks.map(({ id, logo_url, role, title, linkstoBe }) => (
-                          <Link
-                            key={id}
-                            className="flex justify-between items-center bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-lg"
-                            href={"https://linksto.be/" + linkstoBe}
-                            target="_blank"
-                          >
-                            
-                            <img 
-                              src={logo_url || projectDefaultImage}
-                              alt=""
-                              className="rounded-full size-8 border object-cover"
-                            />
+                      <Popover>
+                        <PopoverTrigger>
+                          <List />
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="flex flex-col gap-2"
+                        >
+                          {
+                            newLinks.map(({ id, logo_url, role, title, linkstoBe }) => (
+                              <Link
+                                key={id}
+                                className="flex justify-between items-center bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-lg"
+                                href={"https://linksto.be/" + linkstoBe}
+                                target="_blank"
+                              >
+                                
+                                <img 
+                                  src={logo_url || projectDefaultImage}
+                                  alt=""
+                                  className="rounded-full size-8 border object-cover"
+                                />
 
-                            <span
-                              className="text-sm"
-                            >{ title }</span>
+                                <span
+                                  className="text-sm"
+                                >{ title }</span>
 
-                            <span
-                              className={cn(
-                                "p-1 rounded-lg text-white",
-                                //@ts-ignore
-                                roleStyle[jwtDecode(role)?.role.toLowerCase()]
-                              )}
-                            >
-                              <Crown 
-                                color="#ffffff"
-                                size={16}
-                              />
-                            </span>
-                          </Link>
-                        ))
-                      }
-                    </PopoverContent>
-                  </Popover>
-                </Table.BodyItem>
-              </Table.Row>
-            ))}
+                                <span
+                                  className={cn(
+                                    "p-1 rounded-lg text-white",
+                                    //@ts-ignore
+                                    roleStyle[jwtDecode(role)?.role.toLowerCase()]
+                                  )}
+                                >
+                                  <Crown 
+                                    color="#ffffff"
+                                    size={16}
+                                  />
+                                </span>
+                              </Link>
+                            ))
+                          }
+                        </PopoverContent>
+                      </Popover>
+                    </Table.BodyItem>
+                  </Table.Row>
+                ))
+            }
           </Table.BodySection>
         </Table.Content>
 
