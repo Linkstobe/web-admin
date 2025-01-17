@@ -16,12 +16,18 @@ import { DateRange } from "react-day-picker"
 import { IProject } from "@/interfaces/IProjects"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, DollarSign, UserPlus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { ProjectService } from "@/services/project.service"
 import { Pagination, PaginationItem, Stack } from "@mui/material"
 import LineChart from "@/components/line-chart"
+import { AnalyticsSimpleCard } from "@/components/analytics-simple-card"
+import ProjectRevenueMetric from "./project-revenue-metric"
+import NewProjectsMetric from "./new-projects-metric"
+import NewLinkSourceTable from "../link-engagement/new-link-source-table"
+import { IUser } from "@/interfaces/IUser"
+import { UserService } from "@/services/user.service"
 
 export default function ReportContent () {
   const [allMetrics, setAllMetrics] = useState<IMetric[]>([])
@@ -40,11 +46,15 @@ export default function ReportContent () {
   const [locationMetrics, setLocationMetrics] = useState<IMetric[]>()
   const [allLocationMetrics, setAllLocationMetrics] = useState<IMetric[]>()
 
+  const [allUsers, setAllUsers] = useState<IUser[]>([])
   const [allProjects, setAllProjects] = useState<IProject[]>([])
+  const [allNewProjects, setAllNewProjects] = useState<IProject[]>([])
+  const [filteredAllNewProjects, setFilteredAllNewProjects] = useState<IProject[]>([])
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
   const [value, setValue] = useState<string>("")
+  const [selectedProjectId, setSelectedProjectId] = useState<string | number>("all")
 
   const [currentPage, setCurrentPage] = useState<number>(1)
   const projectsPerPage: number = 8
@@ -105,12 +115,24 @@ export default function ReportContent () {
         const projects = await ProjectService.getAllProject()
         setAllProjects(projects)
         setFilteredProjects(projects)
+        setAllNewProjects(projects)
+        setFilteredAllNewProjects(projects)
+      } catch (error) {
+        console.log("ReportContent: ", error)
+      }
+    }
+
+    const getAllUsers = async () => {
+      try {
+        const users = await UserService.getAllUsers()
+        setAllUsers(users)
       } catch (error) {
         console.log("ReportContent: ", error)
       }
     }
 
     getAllProjects()
+    getAllUsers()
   }, [])
 
   useEffect(() => {
@@ -119,6 +141,8 @@ export default function ReportContent () {
       let clicks = [...(allClicksMetrics || [])]
       let socialMediaAccesses = [...(allSocialMediaAccessesMetrics || [])]
       let locations = [...(allLocationMetrics || [])]
+      
+      let newProjects = [...(allNewProjects) || []]
 
       // Filtro por projeto
       if (selectedProject) {
@@ -150,10 +174,16 @@ export default function ReportContent () {
           const metricDate = new Date(metric.createdAt)
           return metricDate >= start && metricDate <= end
         })
+
+        newProjects = newProjects.filter((project) => {
+          const projectDate = new Date(project.createdAt)
+          return projectDate >= start && projectDate <= end
+        })
       }
 
       // Atualiza os estados filtrados
       setAccessesMetrics(accesses)
+      setFilteredAllNewProjects(newProjects)
       setClicksMetrics(clicks)
       setSocialMediaAccessesMetrics(socialMediaAccesses)
       setLocationMetrics(locations)
@@ -193,6 +223,21 @@ export default function ReportContent () {
                 <CommandList>
                   <CommandEmpty>Projeto não encontrado</CommandEmpty>
                   <CommandGroup>
+                    <CommandItem
+                      value="Todos"
+                      onSelect={(currentValue) => {
+                        setSelectedProject(null)
+                        setValue("")
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedProject === null ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      Todos
+                    </CommandItem>
                     {
                       paginatedProjects.map(({ id, linkstoBe }, index) => (
                         <CommandItem
@@ -202,6 +247,7 @@ export default function ReportContent () {
                             setValue(currentValue)
                             if (selectedProject === id) {
                               setSelectedProject(null)
+                              setValue("")
                               return
                             }
                             setSelectedProject(id)
@@ -253,7 +299,7 @@ export default function ReportContent () {
         </div>
       </div>
 
-       <div
+      <div
         className="flex flex-col gap-4"
       >
         <Separator />
@@ -274,6 +320,7 @@ export default function ReportContent () {
         clicksMetrics={clicksMetrics}
         dateRange={date}
       />
+
       
       <AccessesPerHour 
         clicksMetrics={clicksMetrics}
@@ -290,7 +337,7 @@ export default function ReportContent () {
         <AccessesToSocialMedia 
           socialMediaAccessesMetrics={socialMediaAccessesMetrics}
         />
-      </div>
+      </div> 
 
       <div
         className="grid grid-cols-2 gap-4 bg-white rounded-lg shadow-lg p-4"
@@ -301,6 +348,27 @@ export default function ReportContent () {
 
         <AccessesByCountry 
           locationMetrics={locationMetrics}
+        />
+      </div>
+
+      <div
+        className="grid grid-cols-2 gap-4 bg-white rounded-lg shadow-lg p-4"
+      >
+        <NewProjectsMetric 
+          selectedProject={selectedProject}
+          projects={filteredAllNewProjects}
+        />
+        
+        <ProjectRevenueMetric 
+          projects={filteredAllNewProjects}
+          selectedProject={selectedProject}
+        />
+      </div>
+
+      <div>
+        <NewLinkSourceTable
+          projects={allProjects}
+          users={allUsers}
         />
       </div>
     </div>
