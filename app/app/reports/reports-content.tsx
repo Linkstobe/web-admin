@@ -28,6 +28,7 @@ import NewProjectsMetric from "./new-projects-metric"
 import NewLinkSourceTable from "../link-engagement/new-link-source-table"
 import { IUser } from "@/interfaces/IUser"
 import { UserService } from "@/services/user.service"
+import NewProjectsTable from "./new-projects-table"
 
 export default function ReportContent () {
   const [allMetrics, setAllMetrics] = useState<IMetric[]>([])
@@ -52,6 +53,9 @@ export default function ReportContent () {
   const [filteredAllNewProjects, setFilteredAllNewProjects] = useState<IProject[]>([])
   const [filteredProjects, setFilteredProjects] = useState<IProject[]>([])
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
+
+  const [newProjectsByReferral, setNewProjectsByReferral] = useState<IProject[]>([])
+  const [filteredNewProjectsByReferral, setFilteredNewProjectsByReferral] = useState<IProject[]>([])
 
   const [value, setValue] = useState<string>("")
   const [selectedProjectId, setSelectedProjectId] = useState<string | number>("all")
@@ -117,6 +121,12 @@ export default function ReportContent () {
         setFilteredProjects(projects)
         setAllNewProjects(projects)
         setFilteredAllNewProjects(projects)
+        
+        const projectsByReferral = projects.filter(({ referral_id }) => Number(referral_id))
+        console.log({projectsByReferral})
+        setNewProjectsByReferral(projectsByReferral)
+        setFilteredNewProjectsByReferral(projectsByReferral)
+
       } catch (error) {
         console.log("ReportContent: ", error)
       }
@@ -144,12 +154,15 @@ export default function ReportContent () {
       
       let newProjects = [...(allNewProjects) || []]
 
+      let projectsByReferral = [...(newProjectsByReferral || [])]
+
       // Filtro por projeto
       if (selectedProject) {
         accesses = accesses.filter((metric) => Number(metric.user_id) === Number(selectedProject))
         clicks = clicks.filter((metric) => Number(metric.user_id) === Number(selectedProject))
         socialMediaAccesses = socialMediaAccesses.filter((metric) => Number(metric.user_id) === Number(selectedProject))
         locations = locations.filter((metric) => Number(metric.user_id) === Number(selectedProject))
+        // projectsByReferral = projectsByReferral.filter(({ referral_id }) => Number(referral_id) === Number(selectedProject))
       }
 
       // Filtro por data
@@ -179,6 +192,11 @@ export default function ReportContent () {
           const projectDate = new Date(project.createdAt)
           return projectDate >= start && projectDate <= end
         })
+
+        projectsByReferral = projectsByReferral.filter((project) => {
+          const projectDate = new Date(project.createdAt)
+          return projectDate >= start && projectDate <= end
+        })
       }
 
       // Atualiza os estados filtrados
@@ -187,6 +205,7 @@ export default function ReportContent () {
       setClicksMetrics(clicks)
       setSocialMediaAccessesMetrics(socialMediaAccesses)
       setLocationMetrics(locations)
+      setFilteredNewProjectsByReferral(projectsByReferral)
     }
 
     onFilterMetrics()
@@ -366,11 +385,18 @@ export default function ReportContent () {
       </div>
 
       <div>
-        <NewLinkSourceTable
+        {/* <NewLinkSourceTable
           allProjects={allProjects}
           projects={filteredAllNewProjects}
           users={allUsers}
           selectedProject={selectedProject}
+        /> */}
+
+        <NewProjectsTable 
+          projects={filteredNewProjectsByReferral}
+          selectedProject={selectedProject}
+          users={allUsers}
+          allProjects={allProjects}
         />
       </div>
     </div>

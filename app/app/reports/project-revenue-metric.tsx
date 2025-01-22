@@ -58,11 +58,18 @@ export default function ProjectRevenueMetric ({
 
       if (role === "basic") {
         freeSubscriptions++;
-      } else if (role === "pro") {
+      } else if (
+        role === "pro" &&
+        new Date(project.createdAt).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000
+      ) {
+        console.log({ project });
         proSubscriptions++;
       } else if (role === "premium") {
         premiumSubscriptions++;
       }
+
+
+
     });
 
     const totalRevenue = (proSubscriptions * proSubscriptionPrice) + (premiumSubscriptions * premiumSubscriptionPrice)
@@ -89,7 +96,7 @@ export default function ProjectRevenueMetric ({
     });
 
     setRevenue(totalRevenue)
-  }, [selectedProject])
+  }, [selectedProject, projects])
 
   return (
     <AnalyticsSimpleCard.Root>
