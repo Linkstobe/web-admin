@@ -149,7 +149,8 @@ export default function PanelsLibrary () {
         order_id: initialAdvancedPanelModelsSorting.length,
         arquived: false,
         project_id: projectWithAllAdvancedPanels,
-        painel_title_classname: `font-family: ${selectedFont}; font-size: 20px; color: ${color};`
+        painel_title_classname: `font-family: ${selectedFont}; font-size: 20px; color: ${color};`,
+        painel_style: "advanced"
       })
 
       toast({
@@ -211,10 +212,8 @@ export default function PanelsLibrary () {
     try {
       const allAdvancedPanelsModels = await PainelService.getPainelByProjectId(projectWithAllAdvancedPanels)
 
-      const validAdvancedPanelsModels = allAdvancedPanelsModels.filter(({ productsArray }) => !productsArray[0]?.isModel)
+      const validAdvancedPanelsModels = allAdvancedPanelsModels.filter(({ productsArray }) => !productsArray[0]?.isDeleted)
       const ordenedAdvancedPanelsModels = validAdvancedPanelsModels.sort((a, b) => a.order_id - b.order_id);
-
-      console.log({ allAdvancedPanelsModels })
 
       setAdvancedPanelsModels(ordenedAdvancedPanelsModels)
       setInitialAdvancedPanelModelsSorting(ordenedAdvancedPanelsModels)
@@ -280,7 +279,7 @@ export default function PanelsLibrary () {
 
       toast({
         variant: "success",
-        title: "Painéis ordenado!",
+        title: "Painéis ordenados!",
         description: "Os painéis foram ordenados com sucesso.",
       });
 
