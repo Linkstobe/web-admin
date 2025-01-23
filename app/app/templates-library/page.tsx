@@ -190,7 +190,7 @@ export default function TemplatesLibrary () {
       const projectWithBasicButtons = 1130
 
       const allAdvancedPanelsModels = await PainelService.getPainelByProjectId(projectWithAllAdvancedPanels)
-      const validAdvancedPanelsModels = allAdvancedPanelsModels.filter(({ productsArray }) => !productsArray[0]?.isModel)
+      const validAdvancedPanelsModels = allAdvancedPanelsModels.filter(({ productsArray }) => !productsArray[0]?.isDeleted)
       const ordenedAdvancedPanelsModels = validAdvancedPanelsModels.sort((a, b) => a.order_id - b.order_id);
 
       const allBasicButtons = await PainelService.getPainelByProjectId(projectWithBasicButtons)
