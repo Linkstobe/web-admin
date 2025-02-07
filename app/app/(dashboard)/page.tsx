@@ -1,15 +1,35 @@
+'use client'
 import ProjectSimpleMetrics from "./project-simple-metrics";
 import UserSimpleMetrics from "./user-simple-metrics";
 import ProjectChart from "./project-chart";
-import { AnalyticsSimpleCard } from "@/components/analytics-simple-card";
-import { DollarSign, MousePointerClick, Percent, User } from "lucide-react";
 import PanelMetricsTable from "./panel-metrics";
-import { cookies } from "next/headers";
-import { IMetric } from "@/interfaces/IMetrics";
-import ProjectsMetricsCards from "./projects-metrics-cards";
+import { TransactionService } from "@/services/transactions.service";
 import { Separator } from "@/components/ui/separator";
+import { ProjectService } from "@/services/project.service";
+import { catchError } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { UserService } from "@/services/user.service";
 
-export default async function Dashboard () {
+export default function Dashboard () {
+  const [dashboard, dashboardSet] = useState({
+    projects: [],
+    users: [],
+    transactions: []
+  });  
+  useEffect(() => {
+    (async () => {
+      const [projectsError, projects] = await catchError(ProjectService.getAllProject());
+      if (projectsError) throw projectsError;
+      dashboardSet(prev => ({ ...prev, projects }));
+      const [usersError, users] = await catchError(UserService.getAllUsers());
+      if (usersError) throw usersError;
+      dashboardSet(prev => ({ ...prev, users }));
+      const [transactionsError, transactions] = await catchError(TransactionService.onGetAllTransactions());
+      if (transactionsError) throw transactionsError;
+      dashboardSet(prev => ({ ...prev, transactions }));
+    })()
+  }, [])
+
   return (
     <div
       className="flex flex-col gap-4 pb-20"
@@ -26,8 +46,7 @@ export default async function Dashboard () {
         >
           Usuários
         </h3>
-
-        <UserSimpleMetrics />
+        <UserSimpleMetrics userAmount={dashboard.users.length} />
       </div>
 
       <div
@@ -39,8 +58,8 @@ export default async function Dashboard () {
           Projetos
         </h3>
 
-        <ProjectSimpleMetrics />
-        <ProjectChart />
+        <ProjectSimpleMetrics projects={dashboard.projects}  />
+        <ProjectChart projects={dashboard.projects} transactions={dashboard.transactions} />
       </div>
 
       {/* <div
@@ -103,16 +122,14 @@ export default async function Dashboard () {
       </div>
 */}
 
+      <h1 className="text-2xl font-bold tracking-tight text-[#164F62]">
+        Métricas de painéis
+      </h1>
       <div
         className="flex flex-col gap-4"
       >
         <Separator />
-        <h4
-          className="text-2xl font-bold tracking-tight text-[#164F62]"
-        >
-          Métricas de painéis
-        </h4>
-        <PanelMetricsTable />
+        <PanelMetricsTable projects={dashboard.projects} />
       </div> 
     </div>
   )
