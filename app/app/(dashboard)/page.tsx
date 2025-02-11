@@ -13,7 +13,7 @@ import { UserService } from "@/services/user.service";
 export default function Dashboard () {
   const [dashboard, dashboardSet] = useState({
     projects: [],
-    users: [],
+    usersAmount: 0,
     transactions: []
   });  
   useEffect(() => {
@@ -21,9 +21,9 @@ export default function Dashboard () {
       const [projectsError, projects] = await catchError(ProjectService.getAllProject());
       if (projectsError) throw projectsError;
       dashboardSet(prev => ({ ...prev, projects }));
-      const [usersError, users] = await catchError(UserService.getAllUsers());
+      const [usersError, usersAmount] = await catchError(UserService.getAmount());
       if (usersError) throw usersError;
-      dashboardSet(prev => ({ ...prev, users }));
+      dashboardSet(prev => ({ ...prev, usersAmount }));
       const [transactionsError, transactions] = await catchError(TransactionService.onGetAllTransactions());
       if (transactionsError) throw transactionsError;
       dashboardSet(prev => ({ ...prev, transactions }));
@@ -46,7 +46,7 @@ export default function Dashboard () {
         >
           Usuários
         </h3>
-        <UserSimpleMetrics userAmount={dashboard.users.length} />
+        <UserSimpleMetrics userAmount={dashboard.usersAmount} />
       </div>
 
       <div
@@ -129,7 +129,7 @@ export default function Dashboard () {
         className="flex flex-col gap-4"
       >
         <Separator />
-        <PanelMetricsTable projects={dashboard.projects} />
+        <PanelMetricsTable />
       </div> 
     </div>
   )

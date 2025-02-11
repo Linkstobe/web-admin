@@ -97,7 +97,7 @@ export default function ProjectSimpleMetrics ({ projects = [] }) {
         {
           planCount.map(({ plan, count, percentage }, index) => (
             <SimpleMetricCard.Root
-              className={count === "" ? "animate-pulse" : ""}
+              className={count === "0" ? "animate-pulse" : ""}
               key={index}
             >
               <SimpleMetricCard.TextSection>

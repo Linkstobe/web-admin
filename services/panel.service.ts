@@ -1,9 +1,19 @@
 import { ICreatePanel, IPainel } from "@/interfaces/IPanels";
 import { Api } from "@/provider/Api";
 
+type IDateRange = {
+  startDate: string;
+  endDate: string;
+};
+
 export const PainelService = {
   async createNewPainel(payload: ICreatePanel) {
     const { data } = await Api.post<IPainel>("/painels", payload);
+    return data;
+  },
+
+  async getPainelsMetrics(params?: IDateRange) {
+    const { data } = await Api.get("/painels/metrics", { params });
     return data;
   },
 
@@ -12,9 +22,9 @@ export const PainelService = {
     return data;
   },
 
-  async onGetAllPanels () {
-    const { data } = await Api.get<IPainel[]>("/painels")
-    return data
+  async onGetAllPanels() {
+    const { data } = await Api.get<IPainel[]>("/painels");
+    return data;
   },
 
   async getPainelByProjectId(projectId: string | number) {
