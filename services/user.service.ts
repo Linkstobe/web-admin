@@ -7,9 +7,14 @@ export const UserService = {
     return data;
   },
 
-  async getAllUsers () {
-    const { data } = await Api.get("/users")
-    return data
+  async getAllUsers() {
+    const { data } = await Api.get("/users");
+    return data;
+  },
+
+  async getAmount() {
+    const { data } = await Api.get("/users/amount");
+    return data;
   },
 
   async getUserById(id: string | number) {

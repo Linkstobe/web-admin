@@ -1,23 +1,23 @@
 import { StorageHelper } from "@/helpers/storage-helper";
 import { usePermission } from "@/hook/use-permission";
 import { UserService } from "@/services/user.service";
-import axios from "axios"
+import axios from "axios";
 
-const API = "https://srv538807.hstgr.cloud/api/v1"
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 export const Api = axios.create({
-  baseURL: API
-})
+  baseURL: API,
+});
 
-export async function setBearerToken (token: string) {
-  Api.defaults.headers.common["Authorization"] = `Bearer ${token}`
+export async function setBearerToken(token: string) {
+  Api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
 function getCookie(name: string) {
   const nameEQ = `${name}=`;
   const decodedCookie = decodeURIComponent(document.cookie);
-  const cookies = decodedCookie.split(';');
-  
+  const cookies = decodedCookie.split(";");
+
   for (let i = 0; i < cookies.length; i++) {
     let cookie = cookies[i].trim();
     if (cookie.indexOf(nameEQ) === 0) {
@@ -29,12 +29,12 @@ function getCookie(name: string) {
 
 (async () => {
   try {
-    const token = getCookie('authToken');
+    const token = getCookie("authToken");
     if (token) {
       setBearerToken(token);
     }
 
-    const permission = getCookie('permission');
+    const permission = getCookie("permission");
     if (permission) {
       usePermission.getState().setPermission(permission);
     }

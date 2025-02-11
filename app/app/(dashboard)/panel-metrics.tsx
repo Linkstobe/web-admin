@@ -1,30 +1,29 @@
 'use client'
 import CalendarDateRangePicker from "@/components/date-ranger-picker"
 import { Table } from "@/components/table"
-import { formatDateToSequelize } from "@/lib/utils"
-import { MetricsServices } from "@/services/metrics.service"
+import { catchError, formatDateToSequelize } from "@/lib/utils"
 import { PainelService } from "@/services/panel.service"
 import { Pagination, Stack } from "@mui/material"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
-export default function PanelMetricsTable ({ projects }) {
+export default function PanelMetricsTable () {
   const [panelMetrics, setPanelMetrics] = useState([]);
   const [date, setDate] = useState({
-    from: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    from: new Date(Date.now() - 368 * 24 * 60 * 60 * 1000),
     to: new Date()
   });
-  const [filteredPanelMetrics, setFilteredPanelMetrics] = useState([])
+  const [filteredPanelMetrics, setFilteredPanelMetrics] = useState(undefined)
 
-  const dateChangeAction = (date: { from: Date, to: Date }) => {
-    setDate(date)
-    getPanelMetrics()
+  const dateChangeAction = async (event: {from: Date, to: Date }) => {
+    setDate(event);
+    getPanelMetrics();
   }
 
   const [currentPage, setCurrentPage] = useState(1)
   const panelsPerPage = 10
 
-  const paginatedPanels = filteredPanelMetrics.slice(
+  const paginatedPanels = filteredPanelMetrics?.slice(
     (currentPage - 1) * panelsPerPage,
     currentPage * panelsPerPage
   )
@@ -50,58 +49,21 @@ export default function PanelMetricsTable ({ projects }) {
   }
 
   const getPanelMetrics = async () => {
-    try {
-      const allMetrics = await MetricsServices.onGetAllMetrics({
-        startDate: formatDateToSequelize(date.from),
-        endDate: formatDateToSequelize(date.to)
-      })
-      const panelMetrics = allMetrics.filter(({ link_type }) => 
-        link_type.startsWith("click:panel-link") || 
-        link_type.startsWith("click:panel-basic") || 
-        link_type.startsWith("click:panel-advanced")
-      )
-
-      const allPanels = await PainelService.onGetAllPanels()
-      const validPanels = allPanels.filter(({ painel_style }) => 
-        painel_style === "link" ||
-        painel_style === "basic" ||
-        painel_style === "advanced"
-      )
-
-      const panelData = validPanels.map((panel) => {
-        const panelId = panel.id
-        const clicks = panelMetrics.reduce((count, metric) => {
-          const metricId = metric.link_type.split('-').pop()
-          return Number(metricId) === Number(panelId) ? count + 1 : count
-        }, 0)
-
-        const projectMatch = projects.find(
-          (project: any) => project.id === panel.project_id
-        )
-
-        return {
-          title: panel.painel_title || "sem título",
-          url: panel.painelUrl || "sem url",
-          type: panel.painel_style,
-          clicks: clicks,
-          project: projectMatch.linkstoBe
-        }
-      }).sort((a, b) => b.clicks - a.clicks)
-
-      setPanelMetrics(panelData)
-      setFilteredPanelMetrics(panelData)
-
-    } catch (error) {
-      console.log(error)
-    }
+    const [err, metrics] = await catchError(PainelService.getPainelsMetrics({ 
+      startDate: formatDateToSequelize(date.from),
+      endDate: formatDateToSequelize(date.to)
+    }));
+    if (err) console.error(err);
+    setPanelMetrics(metrics);
+    setFilteredPanelMetrics(metrics);
   }
 
   useEffect(() => {
     getPanelMetrics()
-  }, [projects])
+  }, [])
 
   return (
-    <Table.Root className={paginatedPanels.length === 0 && "animate-pulse"}>
+    <Table.Root className={!paginatedPanels && "animate-pulse"}>
       <Table.TopSection>
         
           <Table.Title 
@@ -131,7 +93,7 @@ export default function PanelMetricsTable ({ projects }) {
         </Table.HeaderSection>
         <Table.BodySection>
           {
-            paginatedPanels.map(({ title, url, clicks, type, project }, index) => (
+            paginatedPanels?.map(({ title, url, clicks, type, project }, index) => (
               <Table.Row
                 key={index}
               >
@@ -158,7 +120,7 @@ export default function PanelMetricsTable ({ projects }) {
         <div className="px-4 py-2 flex justify-end">
           <Stack>
             <Pagination 
-              count={Math.ceil(filteredPanelMetrics.length / panelsPerPage)} 
+              count={Math.ceil(filteredPanelMetrics?.length / panelsPerPage)} 
               page={currentPage}
               onChange={handlePageChange}
               variant="outlined" 
