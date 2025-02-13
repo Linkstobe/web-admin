@@ -6,6 +6,7 @@ import {
   LayoutDashboard, 
   Lock, 
   LucideIcon, 
+  MonitorPlay, 
   PanelTop, 
   Server, 
   ShoppingCart, 
@@ -165,6 +166,18 @@ export function handleGetMenuList(pathname: string): Group[] {
           label: "Usuários Admin",
           active: pathname.includes("/app/admin-users"),
           icon: UserPlus,
+          subMenus: []
+        },
+      ]
+    },
+    {
+      groupLabel: 'Suporte',
+      menus: [
+        {
+          href: "/app/tutorials",
+          label: "Tutoriais",
+          active: pathname.includes("/app/tutorials"),
+          icon: MonitorPlay,
           subMenus: []
         },
       ]

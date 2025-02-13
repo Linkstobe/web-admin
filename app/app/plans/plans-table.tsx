@@ -107,6 +107,7 @@ export function PlansTable() {
         status: project.blocked ? "Bloqueado" : "Ativo",
         project_id: project.id,
         user_id: user.id,
+        isTrial: user?.flag_user_trial,
         projectCreatedAt: new Date(project.createdAt).toLocaleDateString('pt-BR')
       };
     });
@@ -342,7 +343,6 @@ export function PlansTable() {
     document.body.removeChild(link)
   }
 
-
   return (
     <Table.Root>
       <Table.TopSection>
@@ -483,7 +483,7 @@ export function PlansTable() {
 
         <Table.BodySection>
           {
-            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, status, plan, project_id, user_id }, index) => (
+            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, status, plan, project_id, user_id, isTrial }, index) => (
               <Table.Row key={index}>
                 <Table.BodyItem>
                   <div
@@ -531,7 +531,7 @@ export function PlansTable() {
                       )
                     }
                   >
-                    { plan?.toUpperCase() }
+                    { plan?.toUpperCase() } {plan?.toUpperCase() !== "PREMIUM" && isTrial ? "TRIAL": ""}
                   </Badge>
                 </Table.BodyItem>
                 <Table.BodyItem>

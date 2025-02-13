@@ -12,6 +12,7 @@ export interface IUser {
   updatedAt: string;
   permission: string;
   blocked: boolean;
+  flag_user_trial: boolean;
 }
 
 export interface ICreateUser {
@@ -23,6 +24,7 @@ export interface ICreateUser {
   profile_photo: string;
   permission: string;
   blocked: boolean;
+  flag_user_trial?: boolean;
 }
 
 export interface IUploadUser extends Partial<IUser> {}
