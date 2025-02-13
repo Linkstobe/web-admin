@@ -483,7 +483,7 @@ export function PlansTable() {
 
         <Table.BodySection>
           {
-            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, status, plan, project_id, user_id, isTrial }, index) => (
+            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, status, plan, project_id, user_id }, index) => (
               <Table.Row key={index}>
                 <Table.BodyItem>
                   <div
@@ -531,7 +531,7 @@ export function PlansTable() {
                       )
                     }
                   >
-                    { plan?.toUpperCase() } {plan?.toUpperCase() !== "PREMIUM" && isTrial ? "TRIAL": ""}
+                    { plan?.toUpperCase() }
                   </Badge>
                 </Table.BodyItem>
                 <Table.BodyItem>
