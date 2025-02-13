@@ -1,69 +1,25 @@
 'use client'
 import { useEffect, useState } from "react"
 import EngagementCard from "./engagement-card"
-import { IProject } from "@/interfaces/IProjects"
-import { ProjectService } from "@/services/project.service"
+import { ProjectCreationMetrics, ProjectService } from "@/services/project.service"
+import { catchError } from "@/lib/utils"
 
-interface ProjectEngagementCardProps {
-  projects: IProject[]
-}
+export default function ProjectEngagementCard () {
 
-type ProjectCreationMetrics = {
-  total: number
-  inTheLastSevenDays: number
-  inTheLastMonth: number
-}
-
-export default function ProjectEngagementCard ({
-  projects
-}: ProjectEngagementCardProps) {
   const [projectCreationMetrics, setProjectCreationMetrics] = useState<ProjectCreationMetrics>({
     total: 0,
-    inTheLastSevenDays: 0,
-    inTheLastMonth: 0
-  })
+    lastWeek: 0,
+    lastMonth: 0
+  });
+
 
   useEffect(() => {
-    const getProjectCreationMetrics = async () => {
-      if (!projects) return
-      
-      const validProjects: IProject[] = projects.filter(({ linkstoBe }) =>
-        !linkstoBe.includes("temanovo_") &&
-        !linkstoBe.includes("tema_") &&
-        !linkstoBe.includes("modelos_linkstobe")
-      )
-
-      const now = new Date()
-      const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(now.getDate() - 7)
-
-      const oneMonthAgo = new Date()
-      oneMonthAgo.setMonth(now.getMonth() - 1)
-
-      const metrics = validProjects.reduce(
-        (acc, project) => {
-          const createdAt = new Date(project.createdAt)
-
-          acc.total += 1 
-
-          if (createdAt >= sevenDaysAgo) {
-            acc.inTheLastSevenDays += 1
-          }
-
-          if (createdAt >= oneMonthAgo) {
-            acc.inTheLastMonth += 1
-          }
-
-          return acc
-        },
-        { total: 0, inTheLastSevenDays: 0, inTheLastMonth: 0 }
-      )
-
-      setProjectCreationMetrics(metrics)
-    }
-
-    getProjectCreationMetrics()
-  }, [projects])
+    (async () => {
+      const [err, metrics] = await catchError(ProjectService.findClikedResume());
+      if (err) console.error(err);
+      setProjectCreationMetrics(metrics);
+    })();
+  }, [])
 
   return (
     <div
@@ -79,13 +35,13 @@ export default function ProjectEngagementCard ({
 
         <EngagementCard 
           title="Links Criados nos últimos 7 dias"
-          value={projectCreationMetrics.inTheLastSevenDays}
+          value={projectCreationMetrics.lastWeek}
         />
       </div>
 
       <EngagementCard 
         title="Links Criados nos últimos 30 dias"
-        value={projectCreationMetrics.inTheLastMonth}
+        value={projectCreationMetrics.lastMonth}
       />
     </div>
   )

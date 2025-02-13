@@ -41,7 +41,7 @@ export default function UsersTable () {
   const [selectedBulkAction, setSelectedBulkAction] = useState<string>("")
   const [selectedUsersId, setSelectedUsersId] = useState<number[]>([])
 
-  const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>([])
+  const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>(undefined)
   const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
 
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -143,7 +143,6 @@ export default function UsersTable () {
 
       await onGetAllUsers()
     } catch (error) {
-      console.log("UsersTable: ", error)
       toast({
         variant: "destructive",
         title: "Erro ao excluir usuário",
@@ -264,7 +263,7 @@ export default function UsersTable () {
   }, [])
 
   return (
-    <Table.Root>
+    <Table.Root className={!tableMetrics && "animate-pulse"}>
       <Table.TopSection>
         <Table.Title 
           title="Usuários ativos"
