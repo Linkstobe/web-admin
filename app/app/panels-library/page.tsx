@@ -12,13 +12,14 @@ import { handleGetAvailableFontsList } from "@/lib/available-fonts-list";
 import { cn } from "@/lib/utils";
 import { PainelService } from "@/services/panel.service";
 import { Pagination, PaginationItem, Stack } from "@mui/material";
-import { Check, ChevronsUpDownIcon, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ChevronsUpDownIcon, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { usePermission } from "@/hook/use-permission";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
+import { Input } from "@/components/ui/input";
 
 export default function PanelsLibrary () {
   const { toast } = useToast()
@@ -38,6 +39,20 @@ export default function PanelsLibrary () {
   const [filteredFonts, setFilteredFonts] = useState<typeof availableFonts>(availableFonts)
 
   const [selectedFont, setSelectedFont] = useState<string>("Roboto")
+
+  const [panelFontSize, setPanelFontSize] = useState<number>(26)
+
+  const onIncrementPanelFontSize = (currentSize: number) => {
+    const maxFontSize = 102
+    const canIncrementFontSize = currentSize < maxFontSize
+    if (canIncrementFontSize) setPanelFontSize(prev => prev + 2)
+  }
+
+  const onDecrementPanelFonteSize = (currentSize: number) => {
+    const minFontSize = 16
+    const canDecrementFontSize = currentSize > minFontSize
+    if (canDecrementFontSize) setPanelFontSize(prev => prev - 2)
+  }
 
   const [imageUploadModalIsOpen, setImageUploadModalIsOpen] = useState<boolean>(false)
   const [firstLayerImageUrl, setFirstLayerImageUrl] = useState<string>("")
@@ -99,7 +114,7 @@ export default function PanelsLibrary () {
     }
   }
 
-  const getCssPropertyValue = (style, property) => {
+  const getCssPropertyValue = (style: string, property: string) => {
     const regex = new RegExp(`${property}\\s*:\\s*([^;]+);?`, 'i');
     const match = style.match(regex);
     return match ? match[1].trim() : null;
@@ -149,7 +164,7 @@ export default function PanelsLibrary () {
         order_id: initialAdvancedPanelModelsSorting.length,
         arquived: false,
         project_id: projectWithAllAdvancedPanels,
-        painel_title_classname: `font-family: ${selectedFont}; font-size: 20px; color: ${color};`,
+        painel_title_classname: `font-family: ${selectedFont}; font-size: ${panelFontSize}px; color: ${color};`,
         painel_style: "advanced"
       })
 
@@ -184,7 +199,7 @@ export default function PanelsLibrary () {
 
       //@ts-ignore
       await PainelService.updatePainelById(selectedPanelToUpdate, {
-        painel_title_classname: `font-family: ${selectedFont}; font-size: 20px; color: ${color};`,
+        painel_title_classname: `font-family: ${selectedFont}; font-size: ${panelFontSize}px; color: ${color};`,
         background_url: firstLayerImageUrl,
         imgUrl: secondLayerImageUrl,
         button_url: thirdLayerImageUrl,
@@ -462,6 +477,13 @@ export default function PanelsLibrary () {
                           setSelectedPanelToUpdate(id)
                           setColor(getCssPropertyValue(painel_title_classname, "color"))
                           setSelectedFont(getCssPropertyValue(painel_title_classname, "font-family"))
+                          setPanelFontSize(
+                            Number(
+                              getCssPropertyValue(
+                                painel_title_classname, "font-size"
+                              ).replace("px", "")
+                            )
+                          )
                         }}
                       >
                         <div className="relative w-full rounded-xl aspect-[800/250] border">
@@ -1039,6 +1061,39 @@ export default function PanelsLibrary () {
                   </Command>
                 </PopoverContent>
               </Popover>
+            </div>
+
+            <div
+              className="w-full flex flex-col gap-2 px-2"
+            >
+              <h2
+              className="font-medium text-zinc-600"
+              >
+                Tamanho da fonte
+              </h2>
+
+              <div className="flex">
+                <Input 
+                  value={`${panelFontSize}px`}
+                  className="rounded-r-none"
+                  disabled
+                />
+
+                <Button
+                  variant="outline"
+                  onClick={() => onDecrementPanelFonteSize(panelFontSize)}
+                  className="rounded-l-none rounded-r-none"
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onIncrementPanelFontSize(panelFontSize)}
+                  className="rounded-l-none"
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
             </div>
 
             <div

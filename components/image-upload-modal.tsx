@@ -93,7 +93,7 @@ export default function ImageUploadModal ({
             ? (
               <div className="flex flex-col items-center">
                 <p>Tamanho máximo de 5MB</p>
-                <p>png, jpg, jpeg</p>
+                <p>png, jpg, jpeg, webp</p>
 
                 <Button 
                   className="mt-1"
@@ -106,7 +106,7 @@ export default function ImageUploadModal ({
                 <input
                   type="file"
                   id="upload-image"
-                  accept="image/png, image/jpeg, image/jpg"
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
                   className="sr-only"
                   onChange={handleImageChange}
                   ref={fileInputRef}
