@@ -18,5 +18,6 @@ export const catchError = async <T>(
 };
 
 export const formatDateToSequelize = (date: Date) => {
+  if (!date) return;
   return date.toISOString().split("T").join(" ").split(".")[0];
 };
