@@ -40,6 +40,24 @@ export default function PanelsLibrary () {
 
   const [selectedFont, setSelectedFont] = useState<string>("Roboto")
 
+  const [panelLineHeight, setPanelLineHeight] = useState<number>(1.2)
+
+  const onIncrementPanelLineHeight = (currentSize: number) => {
+    const maxLineHeight = 2
+    const canIncrementLineHeight = currentSize < maxLineHeight
+    if (canIncrementLineHeight) {
+      setPanelLineHeight(prev => Number((Math.round((prev + 0.2) * 10) / 10).toFixed(1)))
+    }
+  }
+
+  const onDecrementPanelLineHeight = (currentSize: number) => {
+    const minLineHeight = 1
+    const canDecrementLineHeight = currentSize > minLineHeight
+    if (canDecrementLineHeight) {
+      setPanelLineHeight(prev => Number((Math.round((prev - 0.2) * 10) / 10).toFixed(1)))
+    }
+  }
+
   const [panelFontSize, setPanelFontSize] = useState<number>(26)
 
   const onIncrementPanelFontSize = (currentSize: number) => {
@@ -164,7 +182,12 @@ export default function PanelsLibrary () {
         order_id: initialAdvancedPanelModelsSorting.length,
         arquived: false,
         project_id: projectWithAllAdvancedPanels,
-        painel_title_classname: `font-family: ${selectedFont}; font-size: ${panelFontSize}px; color: ${color};`,
+        painel_title_classname: `
+          font-family: ${selectedFont}; 
+          font-size: ${panelFontSize}px; 
+          color: ${color};
+          line-height: ${panelLineHeight};
+        `,
         painel_style: "advanced"
       })
 
@@ -1089,6 +1112,39 @@ export default function PanelsLibrary () {
                 <Button
                   variant="outline"
                   onClick={() => onIncrementPanelFontSize(panelFontSize)}
+                  className="rounded-l-none"
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+            </div>
+
+            <div
+              className="w-full flex flex-col gap-2 px-2"
+            >
+              <h2
+              className="font-medium text-zinc-600"
+              >
+                Altura da linha
+              </h2>
+
+              <div className="flex">
+                <Input 
+                  value={`${panelLineHeight}`}
+                  className="rounded-r-none"
+                  disabled
+                />
+
+                <Button
+                  variant="outline"
+                  onClick={() => onDecrementPanelLineHeight(panelLineHeight)}
+                  className="rounded-l-none rounded-r-none"
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onIncrementPanelLineHeight(panelLineHeight)}
                   className="rounded-l-none"
                 >
                   <ChevronRight />
