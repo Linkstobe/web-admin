@@ -50,7 +50,7 @@ export function handleGetMenuList(pathname: string): Group[] {
       ]
     },
     {
-      groupLabel: '',
+      groupLabel: 'Clientes',
       menus: [
         {
           href: "/app/users",

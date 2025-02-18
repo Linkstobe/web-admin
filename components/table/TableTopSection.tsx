@@ -1,17 +1,20 @@
 "use client"
 
-import { ReactNode } from "react"
+import { cn } from "@/lib/utils"
+import { HTMLAttributes, ReactNode } from "react"
 
-interface TableTopSectionProps {
-  children: ReactNode
-}
+interface TableTopSectionProps extends HTMLAttributes<HTMLDivElement> {}
 
 export default function TableTopSection ({
-  children
+  children,
+  className
 }: TableTopSectionProps) {
   return (
     <div
-      className="flex justify-between items-center p-4"
+      className={cn(
+        "flex justify-between items-center p-4",
+        className
+      )}
     >
       { children }
     </div>

@@ -15,6 +15,7 @@ import { Check, ChevronsUpDown } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import ManageAccessModal from "./manage-access-modal"
 
 export default function CreateAdminUserForm () {
   const { toast } = useToast()
@@ -105,6 +106,9 @@ export default function CreateAdminUserForm () {
     }
   })
 
+  const userPermission = createAdminUserForm.watch('permission')
+  const isManaging = userPermission === 'gerenciar'
+
   const onSubmit = async (values: z.infer<typeof createAdminUserSchema>) => {
     try {
       const permissionTag = {
@@ -161,7 +165,6 @@ export default function CreateAdminUserForm () {
       })
     }
   }
-
 
   useEffect(() => {
     const getAllUsers = async () => {
@@ -388,13 +391,27 @@ export default function CreateAdminUserForm () {
                         Ver e editar
                       </SelectItem>
                       <SelectItem value="personalizar">
-                        Somente personalizar
+                        Personalizar
+                      </SelectItem>
+                      <SelectItem value="gerenciar">
+                        Gerenciar
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormItem>
               )}
             />
+
+            {
+              isManaging && 
+              <ManageAccessModal>
+                <Button
+                  variant="outline"
+                >
+                  Gerenciar acessos
+                </Button>
+              </ManageAccessModal>
+            }
 
             <ul className="flex flex-col gap-2">
               <li className="text-sm">

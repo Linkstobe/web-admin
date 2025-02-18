@@ -8,7 +8,7 @@ export const UserService = {
   },
 
   async getAllUsers() {
-    const { data } = await Api.get("/users");
+    const { data } = await Api.get<IUser[]>("/users");
     return data;
   },
 
