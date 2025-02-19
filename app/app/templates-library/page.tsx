@@ -19,17 +19,17 @@ import { ProjectService } from "@/services/project.service"
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd"
 import { Pagination, PaginationItem, Stack } from "@mui/material"
 import { randomBytes } from "crypto"
-import { Check, ChevronsUpDownIcon, DiscAlbum, Eye, Image, Palette, Play, Scan, Server, SquareSquare, Type, X } from "lucide-react"
+import { ArrowsUpFromLine, Check, ChevronLeft, ChevronRight, ChevronsUpDownIcon, DiscAlbum, Eye, Image, Palette, Play, Plus, Scan, Server, SquareSquare, Type, X } from "lucide-react"
 import { AiOutlineSpotify, AiOutlineYoutube } from "react-icons/ai";
 import { useEffect, useState } from "react"
 import { Modal } from "@/components/modal"
+import { Input } from "@/components/ui/input"
 
 export default function TemplatesLibrary () {
   const { toast } = useToast()
   const { canEdit } = usePermission()
 
   const projectWithAllAdvancedPanels = 1499
-
 
   // Left Sidebar
 
@@ -38,7 +38,7 @@ export default function TemplatesLibrary () {
   const [initialAvailableTemplates, setInitialAvailableTemplates] = useState<IProject[]>([])
 
   const [availableTemplatesCurrentPage, setAvailableTemplatesCurrentPage] = useState<number>(1)
-  const templatesPerPage = 12
+  const templatesPerPage = 11
 
   const paginatedAvailablesTemplates = initialAvailableTemplates.slice(
     (availableTemplatesCurrentPage - 1) * templatesPerPage,
@@ -101,11 +101,37 @@ export default function TemplatesLibrary () {
     availableFontsCurrentPage * fontsPerPage
   )
 
+  const [projectTextLineHeight, setProjectTextLineHeight] = useState<number>(1.2)
+
+  const onIncrementProjectLineHeight = (currentSize: number) => {
+    const maxLineHeight = 3
+    const canIncrementLineHeight = currentSize < maxLineHeight
+    if (canIncrementLineHeight) {
+      setProjectTextLineHeight(prev => Number((Math.round((prev + 0.2) * 10) / 10).toFixed(1)))
+    }
+  }
+
+  const onDecrementProjectLineHeight = (currentSize: number) => {
+    const minLineHeight = 1
+    const canDecrementLineHeight = currentSize > minLineHeight
+    if (canDecrementLineHeight) {
+      setProjectTextLineHeight(prev => Number((Math.round((prev - 0.2) * 10) / 10).toFixed(1)))
+    }
+  }
+
   const [selectedCoverType, setSelectedCoverType] = useState<string>("gradient")
   const coverFillTypes = ["Cor", "Imagem"]
   const [selectedCoverFillType, setSelectedCoverFillType] = useState<string>("Cor")
   const [projectCoverColor, setProjectCoverColor] = useState<string>("rgba(175, 51, 242)")
   const [projectCoverImageUrl, setProjectCoverImageUrl] = useState<string>("")
+
+  const [selectedProjectIdToUpdate, setSelectedProjectIdToUpdate] = useState<number>()
+
+  const linkFormatTypes = ["Círculo", "Arredondado", "Quadrado"]
+  const [selectedLinkFormat, setSelectedLinkFormat] = useState<string>("Círculo")
+
+  const [socialMediaIconColor, setSocialMediaIconColor] = useState<string>("rgba(175, 51, 242)")
+  const [socialMediaIconBackgroundColor, setSocialMediaIconBackgroundColor] = useState<string>("rgba(175, 51, 242)")
 
   const onAdvancedPanelsModelsPageChange = (event: any, page: number): void => {
     setAdvancedPanelsModelsCurrentPage(page)
@@ -259,14 +285,14 @@ export default function TemplatesLibrary () {
 
       const project = await ProjectService.getProjectById(id)
 
-      // await ProjectService.updateProjectById(id, {
-      //   config: {
-      //     ...project.config,
-      //     isTemplate: false,
-      //   }
-      // })
+      await ProjectService.updateProjectById(id, {
+        config: {
+          ...project.config,
+          isTemplate: false,
+        }
+      })
 
-      await ProjectService.deleteProjectByID(id)
+      // await ProjectService.deleteProjectByID(id)
 
       toast({
         variant: "success",
@@ -341,15 +367,27 @@ export default function TemplatesLibrary () {
       //@ts-ignore
       const newTemplateSettings: IProject = {
         title: linkstoBe,
-        title_classname: `font-size: 20px; text-align: center; color: ${projectTitleColor}; font-family: ${selectedProjectFont};`,
+        title_classname: `
+          font-size: 20px; 
+          text-align: center; 
+          color: ${projectTitleColor}; 
+          font-family: ${selectedProjectFont};
+          line-height: ${projectTextLineHeight};
+        `,
         description: "",
-        description_classname: `font-size: 18px; text-align: center; color: ${projectTitleColor}; font-family: ${selectedProjectFont};`,
+        description_classname: `
+          font-size: 18px; 
+          text-align: center; 
+          color: ${projectTitleColor}; 
+          font-family: ${selectedProjectFont};
+          line-height: ${projectTextLineHeight};
+        `,
         hasCover: selectedTemplateCoverType === "Com capa",
         background_image: selectedTemplateBackgroundType === "Background" ? templateBackgroundImageUrl : "",
         background_color: selectedTemplateBackgroundType === "Cor" ? templateBackgroundColor : "",
         background_effect: "static",
 
-        banner_url: selectedCoverFillType === "Imagem" ? projectCoverImageUrl : "", //deve ser vazio caso selecionado seja Cor
+        banner_url: selectedCoverFillType === "Imagem" ? projectCoverImageUrl : "",
 
         config: {
           isTemplate: true,
@@ -357,8 +395,8 @@ export default function TemplatesLibrary () {
           order_id: initialAvailableTemplates.length,
           templateVisibility: selectedTemplateVisibilityType,
 
-          headerModel: selectedCoverType, // gradient - rounded - rounded-bottom-full
-          headerStyle: selectedCoverFillType === "Imagem" ? "image" : "color", // image - color
+          headerModel: selectedCoverType,
+          headerStyle: selectedCoverFillType === "Imagem" ? "image" : "color",
           headerStyleContainer: headerStyleContainer[selectedCoverType],
           headerStyleImage: headerStyleImage[selectedCoverType],
           containerColor: selectedCoverFillType !== "Imagem" ? projectCoverColor : "",
@@ -368,17 +406,58 @@ export default function TemplatesLibrary () {
           endGradientColor: "",
           themeColor: templateBackgroundImageUrl ? "" : templateBackgroundColor,
 
-          selectedLinkPanelId: selectedPanelToLinkId, // devemos passar o id do painel usado
-          selectedLinkPanelType: selectedPanelToLinkType, //tipo do painel escolhido, hoje temos avançados e básicos
-          panelBackgroundColor: "rgba(0,0,0,1)", //para personalizado talvez básico
-          panelTextColor: "rgba(255,255,255,1)", //para personalizado talvez básico
+          selectedLinkPanelId: selectedPanelToLinkId,
+          selectedLinkPanelType: selectedPanelToLinkType,
+          panelBackgroundColor: "rgba(0,0,0,1)",
+          panelTextColor: "rgba(255,255,255,1)",
           panelIdLinkedToTemplate: selectedPanelToLinkId,
 
-          mediasLinkedToTemplate: selectedMediasToLink
+          mediasLinkedToTemplate: selectedMediasToLink,
+
+          socialMediaIconColor,
+          socialMediaIconBackgroundColor,
+          socialMediaFormat: selectedLinkFormat,
         },
 
         arquived: false,
-        links: [],
+        links: [
+          {
+            link: "#",
+            link_background: socialMediaIconBackgroundColor,
+            link_icon: socialMediaIconColor,
+            link_format: selectedLinkFormat,
+            link_position: "higher",
+            order_id: 0,
+            social_media: "facebook"
+          },
+          {
+            link: "#",
+            link_background: socialMediaIconBackgroundColor,
+            link_icon: socialMediaIconColor,
+            link_format: selectedLinkFormat,
+            link_position: "higher",
+            order_id: 1,
+            social_media: "youtube"
+          },
+          {
+            link: "#",
+            link_background: socialMediaIconBackgroundColor,
+            link_icon: socialMediaIconColor,
+            link_format: selectedLinkFormat,
+            link_position: "higher",
+            order_id: 3,
+            social_media: "linkedin"
+          },
+          {
+            link: "#",
+            link_background: socialMediaIconBackgroundColor,
+            link_icon: socialMediaIconColor,
+            link_format: selectedLinkFormat,
+            link_position: "higher",
+            order_id: 3,
+            social_media: "instagram"
+          },
+        ],
         blocked: false,
         linkstoBe,
         logo_url,
@@ -405,6 +484,21 @@ export default function TemplatesLibrary () {
     }
   }
 
+  const onUpdateTemplate = async () => {
+    try {
+      const project = await ProjectService.getProjectById(selectedProjectIdToUpdate)
+
+      await ProjectService.updateProjectById(selectedProjectIdToUpdate, {
+        config: {
+          ...project.config,
+          templateDemonstrationImageUrl,
+        }
+      })
+    } catch (error) {
+      console.log("TemplatesLibrary: ", error)
+    }
+  }
+
   const onGetTemplates = async () => {
     try {
       const projects: IProject[] = await ProjectService.getAllProject()
@@ -424,7 +518,6 @@ export default function TemplatesLibrary () {
     onGetPanelsModels()
     onGetTemplates()
   }, [])
-
 
   // TO DO
   // Colocar um cor de background e cor como config de um painel ou de projeto, teria que colocar em vários lugares
@@ -463,6 +556,11 @@ export default function TemplatesLibrary () {
                             src={config?.templateDemonstrationImageUrl} 
                             alt="" 
                             className="w-full rounded-lg"
+                            onClick={() => {
+                              setSelectedProjectIdToUpdate(id)
+                              //@ts-ignore
+                              setTemplateDemonstrationImageUrl(config?.templateDemonstrationImageUrl)
+                            }}
                           />
 
                           <ConfirmationModal
@@ -479,6 +577,17 @@ export default function TemplatesLibrary () {
                         </div>
                       ))
                     }
+
+                    <div 
+                      className="text-white bg-black rounded-lg flex justify-center flex-col items-center cursor-pointer hover:brightness-50 transition-all duration-300"
+                      onClick={() => {
+                        setSelectedProjectIdToUpdate(null)
+                        setTemplateDemonstrationImageUrl("")
+                      }}
+                    >
+                      <Plus />
+                      Novo
+                    </div>
                   </div>
                   <div
                     className="flex justify-end items-center"
@@ -669,14 +778,14 @@ export default function TemplatesLibrary () {
                     <img
                       src="https://srv538807.hstgr.cloud/uploads/file-1727977861614-988019085.webp" 
                       alt=""
-                      className="rounded-full w-24"
+                      className="rounded-full w-28"
                     />
 
                     <div
                       className="flex flex-col gap-1 text-center"
                     >
                       <h3 
-                        className="font-bold text-base"
+                        className="font-bold text-lg"
                         style={{ 
                           fontFamily: selectedProjectFont,
                           color: projectTitleColor
@@ -686,7 +795,7 @@ export default function TemplatesLibrary () {
                       </h3>
 
                       <p 
-                        className="font-medium text-sm"
+                        className="font-medium text-lg"
                         style={{ 
                           fontFamily: selectedProjectFont,
                           color: projectTitleColor
@@ -697,6 +806,76 @@ export default function TemplatesLibrary () {
                     </div>
                   </div>
 
+                </div>
+              </div>
+
+              <div className="w-full flex justify-center gap-4 mt-4">
+                <div 
+                  className="size-10 flex justify-center items-center"
+                  style={{
+                    backgroundColor: socialMediaIconBackgroundColor,
+                    borderRadius: 
+                      selectedLinkFormat === "Círculo"
+                      ? "50%"
+                      : (selectedLinkFormat === "Arredondado")
+                        ? ".5rem"
+                        : "0"
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 28 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 4.16553H16.6667C13.9052 4.16553 11.6667 6.4041 11.6667 9.16552V12.3322H7V16.9989H11.6667V25.1655H16.3333V16.9989H21V12.3322H16.3333V9.83219C16.3333 9.27991 16.781 8.83219 17.3333 8.83219H21V4.16553Z" fill={socialMediaIconColor} />
+                  </svg>
+                </div>
+
+                <div 
+                  className="size-10 flex justify-center items-center"
+                  style={{
+                    backgroundColor: socialMediaIconBackgroundColor,
+                    borderRadius: 
+                      selectedLinkFormat === "Círculo"
+                      ? "50%"
+                      : (selectedLinkFormat === "Arredondado")
+                        ? ".5rem"
+                        : "0"
+                  }}
+                >
+                  <svg width="24" height="17" viewBox="0 0 28 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M24.9089 1.57524C26.113 1.89873 27.0655 2.85125 27.389 4.05534C27.982 6.2479 28 10.7948 28 10.7948C28 10.7948 28 15.3596 27.4069 17.5342C27.0834 18.7383 26.1309 19.6908 24.9268 20.0143C22.7522 20.6073 14 20.6073 14 20.6073C14 20.6073 5.24775 20.6073 3.07317 20.0143C1.86906 19.6908 0.916561 18.7383 0.593069 17.5342C0 15.3416 0 10.7948 0 10.7948C0 10.7948 0 6.2479 0.575096 4.07332C0.898588 2.86921 1.85109 1.91671 3.0552 1.59322C5.22978 1.00015 13.982 0.982178 13.982 0.982178C13.982 0.982178 22.7343 0.982178 24.9089 1.57524ZM18.457 10.7948L11.1964 15.0001V6.58937L18.457 10.7948Z" fill={socialMediaIconColor} />
+                  </svg>
+                </div>
+
+                <div 
+                  className="size-10 flex justify-center items-center"
+                  style={{
+                    backgroundColor: socialMediaIconBackgroundColor,
+                    borderRadius: 
+                      selectedLinkFormat === "Círculo"
+                      ? "50%"
+                      : (selectedLinkFormat === "Arredondado")
+                        ? ".5rem"
+                        : "0"
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 28 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M6.99967 5.33211C6.99967 6.62078 5.95501 7.66545 4.66634 7.66545C3.37768 7.66545 2.33301 6.62078 2.33301 5.33211C2.33301 4.04345 3.37768 2.99878 4.66634 2.99878C5.95501 2.99878 6.99967 4.04345 6.99967 5.33211ZM6.99967 10.5821V26.3321H2.33301V10.5821H6.99967ZM10.4997 10.5821H15.1663V11.5638C15.8962 11.3058 16.6815 11.1654 17.4997 11.1654C21.3657 11.1654 24.4997 14.2995 24.4997 18.1654V26.3321H19.833V18.1654C19.833 16.8768 18.7883 15.8321 17.4997 15.8321C16.211 15.8321 15.1663 16.8768 15.1663 18.1654V26.3321H10.4997V18.1654V10.5821Z" fill={socialMediaIconColor} />
+                  </svg>
+                </div>
+                
+                <div 
+                  className="size-10 flex justify-center items-center"
+                  style={{
+                    backgroundColor: socialMediaIconBackgroundColor,
+                    borderRadius: 
+                      selectedLinkFormat === "Círculo"
+                      ? "50%"
+                      : (selectedLinkFormat === "Arredondado")
+                        ? ".5rem"
+                        : "0"
+                  }}
+                >
+                  <svg width="24" height="24" viewBox="0 0 28 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M7.33301 2.99878C4.57158 2.99878 2.33301 5.23736 2.33301 7.99878V21.3321C2.33301 24.0935 4.57159 26.3321 7.33301 26.3321H20.6663C23.4278 26.3321 25.6663 24.0935 25.6663 21.3321V7.99878C25.6663 5.23736 23.4278 2.99878 20.6663 2.99878H7.33301ZM20.9997 8.83211C21.644 8.83211 22.1663 8.30978 22.1663 7.66545C22.1663 7.02111 21.644 6.49878 20.9997 6.49878C20.3553 6.49878 19.833 7.02111 19.833 7.66545C19.833 8.30978 20.3553 8.83211 20.9997 8.83211ZM19.833 14.6654C19.833 17.8871 17.2213 20.4988 13.9997 20.4988C10.778 20.4988 8.16634 17.8871 8.16634 14.6654C8.16634 11.4438 10.778 8.83211 13.9997 8.83211C17.2213 8.83211 19.833 11.4438 19.833 14.6654ZM13.9997 18.1654C15.9327 18.1654 17.4997 16.5984 17.4997 14.6654C17.4997 12.7324 15.9327 11.1654 13.9997 11.1654C12.0667 11.1654 10.4997 12.7324 10.4997 14.6654C10.4997 16.5984 12.0667 18.1654 13.9997 18.1654Z" fill={socialMediaIconColor} />
+                  </svg>
                 </div>
               </div>
 
@@ -1134,7 +1313,7 @@ export default function TemplatesLibrary () {
               <h3
                 className="text-primary-blue font-bold"
               >
-                Image de demonstração
+                Imagem de demonstração
               </h3>
               <span
                 className="font-semibold cursor-pointer text-neutral-500"
@@ -1813,6 +1992,39 @@ export default function TemplatesLibrary () {
                 <h2
                 className="font-medium text-zinc-600"
                 >
+                  Altura da linha
+                </h2>
+
+                <div className="flex">
+                <Input
+                  value={`${projectTextLineHeight}`}
+                  className="rounded-r-none"
+                  disabled
+                />
+
+                <Button
+                  variant="outline"
+                  onClick={() => onDecrementProjectLineHeight(projectTextLineHeight)}
+                  className="rounded-l-none rounded-r-none"
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => onIncrementProjectLineHeight(projectTextLineHeight)}
+                  className="rounded-l-none"
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+              </div>
+
+              <div
+                className="w-full flex flex-col gap-2 px-2"
+              >
+                <h2
+                className="font-medium text-zinc-600"
+                >
                   Cor
                 </h2>
 
@@ -1845,68 +2057,158 @@ export default function TemplatesLibrary () {
                 </Popover>
               </div>
             </div>
+          </div>
 
-            { /*
-              <div
-                className="px-2 my-2"
+          <div
+            className="flex flex-col gap-2 w-full py-4 shadow-md border rounded-lg"
+          >
+            <div
+              className="flex flex-col gap-2 w-full rounded-lg px-2"
+            >
+              <h3
+                className="text-primary-blue font-bold"
               >
-                <Separator />
-              </div>
-  
+                Redes sociais
+              </h3>
+            </div>
+
+            <div
+              className="w-full flex flex-col gap-2 px-2"
+            >
               <div
-                className="flex flex-col gap-2"
+                className="w-full flex flex-col gap-2 px-2"
               >
-                <div
-                  className="w-full flex flex-col gap-2 px-2"
+                <h2
+                className="font-medium text-zinc-600"
                 >
-                  <h3
-                    className="text-primary-blue font-semibold"
+                  Formato
+                </h2>
+
+                <Popover>
+                  <PopoverTrigger
+                    asChild
                   >
-                    Descrição
-                  </h3>
-                </div>
-  
-                <div
-                  className="w-full flex flex-col gap-2 px-2"
-                >
-                  <h2
-                  className="font-medium text-zinc-600"
-                  >
-                    Cor
-                  </h2>
-  
-                  <Popover>
-                    <PopoverTrigger>
-                      <div
-                        className="flex gap-4 items-center border rounded-md p-1"
-                      >
-                        <div
-                          className="size-7 rounded-md border"
-                          style={{ background: projectDescriptionColor }}
-                        ></div>
-                        <span
-                          className="font-medium"
-                        >
-                          {projectDescriptionColor}
-                        </span>
-                      </div>
-                    </PopoverTrigger>
-  
-                    <PopoverContent
-                      side="left"
-                      className="w-fit"
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="justify-between w-full"
                     >
-                      <ColorPicker
-                        setColor={setProjectDescriptionColor}
-                        hideColorTypeBtns
+                      { selectedLinkFormat || "Selecione o formato..."}
+                      <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+
+                  <PopoverContent>
+                    <Command>
+                      <CommandInput
+                        placeholder="Pesquisar formato"
                       />
-                    </PopoverContent>
-                  </Popover>
-                  
-  
-                </div>
+
+                      <CommandList>
+                        <CommandEmpty>Formato não encontrado</CommandEmpty>
+                        <CommandGroup>
+                          {
+                            linkFormatTypes.map((type, index) => (
+                              <CommandItem
+                                key={index}
+                                value={type}
+                                onSelect={(currentValue) => {
+                                  setSelectedLinkFormat(currentValue)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedLinkFormat === type ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                { type }
+                              </CommandItem>
+                            ))
+                          }
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
-            */ }
+
+              <div
+                className="w-full flex flex-col gap-2 px-2"
+              >
+                <h2
+                className="font-medium text-zinc-600"
+                >
+                  Cor do fundo
+                </h2>
+
+                <Popover>
+                  <PopoverTrigger>
+                    <div
+                      className="flex gap-4 items-center border rounded-md p-1"
+                    >
+                      <div
+                        className="size-7 rounded-md border"
+                        style={{ background: socialMediaIconBackgroundColor }}
+                      ></div>
+                      <span
+                        className="font-medium"
+                      >
+                        {socialMediaIconBackgroundColor}
+                      </span>
+                    </div>
+                  </PopoverTrigger>
+
+                  <PopoverContent
+                    side="left"
+                    className="w-fit"
+                  >
+                    <ColorPicker
+                      setColor={setSocialMediaIconBackgroundColor}
+                      hideColorTypeBtns
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div
+                className="w-full flex flex-col gap-2 px-2"
+              >
+                <h2
+                className="font-medium text-zinc-600"
+                >
+                  Cor do ícone
+                </h2>
+
+                <Popover>
+                  <PopoverTrigger>
+                    <div
+                      className="flex gap-4 items-center border rounded-md p-1"
+                    >
+                      <div
+                        className="size-7 rounded-md border"
+                        style={{ background: socialMediaIconColor }}
+                      ></div>
+                      <span
+                        className="font-medium"
+                      >
+                        {socialMediaIconColor}
+                      </span>
+                    </div>
+                  </PopoverTrigger>
+
+                  <PopoverContent
+                    side="left"
+                    className="w-fit"
+                  >
+                    <ColorPicker
+                      setColor={setSocialMediaIconColor}
+                      hideColorTypeBtns
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
 
           <div
@@ -1932,9 +2234,8 @@ export default function TemplatesLibrary () {
                   className="flex-1"
                   variant="success"
                   disabled={!templateDemonstrationImageUrl}
-                  // onClick={onCreateNewTemplate}
                 >
-                  Criar template
+                  {!selectedProjectIdToUpdate ? 'Criar template' : 'Atualizar'}
                 </Button>
               </Modal.OpenButton>
               <Modal.Container>
@@ -2291,7 +2592,11 @@ export default function TemplatesLibrary () {
                                       className="size-10"
                                     >
                                       <img src={projectCoverImageUrl} className="w-full object-cover rounded-md" alt="" />
-                                    </div>
+                                    
+                              <div
+                                className="size-7 rounded-md border-2"
+                                style={{ background: projectTitleColor }}
+                              ></div></div>
                                   )
                                 }
                                 </span>
@@ -2339,6 +2644,28 @@ export default function TemplatesLibrary () {
                           <div
                             className="flex gap-2 items-center"
                           >
+                            <ArrowsUpFromLine 
+                              size={20}
+                            />
+
+                            <h4
+                              className="font-semibold"
+                            >
+                              Altura da linha:
+                            </h4>
+
+                            <span
+                              className="flex items-center gap-2"
+                            >
+                              {projectTextLineHeight}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div
+                            className="flex gap-2 items-center"
+                          >
                             <Palette 
                               size={20}
                             />
@@ -2377,7 +2704,13 @@ export default function TemplatesLibrary () {
                     </Modal.CloseButton>
 
                     <Button
-                      onClick={onCreateNewTemplate}
+                      onClick={async () => {
+                        if (!selectedProjectIdToUpdate) {
+                          onCreateNewTemplate()
+                          return
+                        }
+                        await onUpdateTemplate()
+                      }}
                       variant="success"
                     >
                       Prosseguir

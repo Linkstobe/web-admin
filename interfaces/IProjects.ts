@@ -10,6 +10,10 @@ export interface IProject {
     order_id: number;
     link: string;
     social_media: string;
+    link_background: string;
+    link_icon: string;
+    link_format: string;
+    link_position: string;
   }[];
   updatedAt: string;
   createdAt: string;
