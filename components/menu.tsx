@@ -1,6 +1,24 @@
 'use client'
 
-import { handleGetMenuList } from "@/lib/menu-list"
+import {
+  ChartNoAxesCombined,
+  ClipboardList,
+  Crown,
+  FileTextIcon,
+  LayoutDashboard,
+  Lock,
+  LucideIcon,
+  MonitorPlay,
+  PanelTop,
+  Server,
+  ShoppingCart,
+  TicketSlash,
+  TriangleAlert,
+  User,
+  UserPlus,
+} from "lucide-react";
+
+import { Group, handleGetMenuList } from "@/lib/menu-list"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "./ui/button"
@@ -16,17 +34,50 @@ import {
 
 import { useStore } from "@/hook/use-store"
 import { useSidebarToggle } from "@/hook/use-sidebar-toggle"
+import { useEffect, useState } from "react"
+import { MenusService } from "@/services/menus.service"
 
 interface MenuProps {
   isOpen: boolean | undefined
 }
+
+const hrefToIcon = {
+  "/app": <LayoutDashboard />,
+  "/app/users": <User />,
+  "/app/link-engagement": <ChartNoAxesCombined />,
+  "/app/panels": <Server />,
+  "/app/reports": <FileTextIcon />,
+  "/app/forms": <ClipboardList />,
+  "/app/products": <ShoppingCart />,
+  "/app/plans": <Crown />,
+  "/app/coupons": <TicketSlash />,
+  "/app/templates-library": <PanelTop />,
+  "/app/panels-library": <Server />,
+  "/app/reported-projects": <TriangleAlert />,
+  "/app/locks": <Lock />,
+  "/app/admin-users": <UserPlus />,
+  "/app/tutorials": <MonitorPlay />,
+};
+
 
 export default function Menu ({
   isOpen
 }: MenuProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const menus = handleGetMenuList(pathname)
+
+  const [menus, setMenus] = useState<Group[]>([])
+  
+    useEffect(() => {
+      
+      const getAllAccessesMetrics = async () => {
+        const menus = JSON.parse(localStorage.getItem('menus')) ? JSON.parse(localStorage.getItem('menus')) : await MenusService.getMenusFromUser(JSON.parse(localStorage.getItem('@linkstobe_user')).id);
+        localStorage.setItem('menus', JSON.stringify(menus));
+        setMenus(handleGetMenuList(menus, pathname))
+      }
+  
+      getAllAccessesMetrics()
+    }, [])
 
   const sidebar = useStore(useSidebarToggle, (state) => state)
 
@@ -78,7 +129,7 @@ export default function Menu ({
                           <Tooltip delayDuration={100}>
                             <TooltipTrigger asChild>
                               <Button
-                                variant={active && isOpen ? 'secondary' : 'ghost'}
+                                variant={pathname === href && isOpen ? 'secondary' : 'ghost'}
                                 className="w-full justify-start h-10 mb-1 p-0 hover:bg-accent"
                                 asChild
                               >
@@ -87,13 +138,10 @@ export default function Menu ({
                                     className={cn(
                                       isOpen ? 'mr-4' : 'ml-0.5',
                                       'p-2 bg-zinc-100 rounded-lg shadow-md',
-                                      active ? 'bg-cyan-900' : '',
+                                      pathname === href  ? 'bg-cyan-900 text-white' : '',
                                     )}
                                   >
-                                    <Icon
-                                      size={20}
-                                      color={active ? 'white' : 'black'}
-                                    />
+                                    { hrefToIcon[href] }
                                   </span>
 
                                   {
