@@ -8,11 +8,27 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IProject } from "@/interfaces/IProjects";
 import { IUser } from "@/interfaces/IUser";
-import { handleGetMenuList } from "@/lib/menu-list";
+import { Group, handleGetMenuList } from "@/lib/menu-list";
+import { MenusService } from "@/services/menus.service";
 import { ProjectService } from "@/services/project.service";
 import { UserService } from "@/services/user.service";
 import { Pagination, Stack } from "@mui/material";
-import Link from "next/link";
+import {
+  ChartNoAxesCombined,
+  ClipboardList,
+  Crown,
+  FileTextIcon,
+  LayoutDashboard,
+  Lock,
+  MonitorPlay,
+  PanelTop,
+  Server,
+  ShoppingCart,
+  TicketSlash,
+  TriangleAlert,
+  User,
+  UserPlus,
+} from "lucide-react";import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HTMLAttributes, useEffect, useState } from "react";
 
@@ -24,6 +40,26 @@ interface TableItem {
   projectId: string | number
 }
 
+
+const hrefToIcon = {
+  "/app": <LayoutDashboard />,
+  "/app/users": <User />,
+  "/app/link-engagement": <ChartNoAxesCombined />,
+  "/app/panels": <Server />,
+  "/app/reports": <FileTextIcon />,
+  "/app/forms": <ClipboardList />,
+  "/app/products": <ShoppingCart />,
+  "/app/plans": <Crown />,
+  "/app/coupons": <TicketSlash />,
+  "/app/templates-library": <PanelTop />,
+  "/app/panels-library": <Server />,
+  "/app/reported-projects": <TriangleAlert />,
+  "/app/locks": <Lock />,
+  "/app/admin-users": <UserPlus />,
+  "/app/tutorials": <MonitorPlay />,
+};
+
+
 export default function ManageAccessModal ({
   children
 }: ManageAccessModalProps) {
@@ -31,7 +67,9 @@ export default function ManageAccessModal ({
   const [filteredTableItems, setFilteredTableItems] = useState<TableItem[]>([])
 
   const pathname = usePathname()
-  const menus = handleGetMenuList(pathname)
+  const [menus, setMenus] = useState<Group[]>([]);
+  const [selectedProjectsIdToManage, setSelectedProjectsIdToManage] = useState<number[]>([])
+  const [managerAccessiblePages, setManagerAccessiblePages] = useState<number[]>(JSON.parse(localStorage.getItem('menus')).map(({ id }) => id) ?? [])
 
   const [currentPage, setCurrentPage] = useState<number>(1)
   const tableItemsPerPage: number = 8
@@ -74,15 +112,10 @@ export default function ManageAccessModal ({
     setCurrentMenusGroupPage(page)
   }
 
-  const [selectedProjectsIdToManage, setSelectedProjectsIdToManage] = useState<number[]>([])
-  const [managerAccessiblePages, setManagerAccessiblePages] = useState<string[]>([
-    "Relatórios",
-    "Formulários",
-    "Produtos"
-  ])
 
-  const onSelectPage = (pageName: string) => {
-    const hasBeenAdded = managerAccessiblePages.includes(pageName)
+
+  const onSelectPage = (pageName: number) => {
+    const hasBeenAdded = managerAccessiblePages.find(v => v === pageName)
     if (hasBeenAdded) {
       setManagerAccessiblePages(prev => prev.filter((value) => value !== pageName))
       return
@@ -107,6 +140,7 @@ export default function ManageAccessModal ({
       try {
         const projects = await ProjectService.getAllProject()
         const users = await UserService.getAllUsers()
+        const menus = await MenusService.getMenus();
 
         const tableItems: TableItem[] = projects.map(project => {
           const user = users.find(user => user.id === project.user_id)
@@ -116,9 +150,10 @@ export default function ManageAccessModal ({
             projectId: project.id
           }
         })
-
         setAllTableItems(tableItems)
         setFilteredTableItems(tableItems)
+        setMenus(handleGetMenuList(menus, pathname))
+        console.log(menus)
       } catch (error) {
         console.log("ManageAccessModalProps: ", error)
       }
@@ -130,6 +165,11 @@ export default function ManageAccessModal ({
   useEffect(() => {
     console.log({ selectedProjectsIdToManage })
   }, [selectedProjectsIdToManage])
+
+  const onSave = async () => {
+    const menus = await MenusService.patchMenusFromUser({ menu_id: managerAccessiblePages, user_id: JSON.parse(localStorage.getItem('@linkstobe_user')).id });
+
+  }
 
   return (
     <Modal.Root>
@@ -165,21 +205,21 @@ export default function ManageAccessModal ({
                           <div className="flex flex-col gap-2" key={`${groupLabel}-${index}`}>
                             <h3 className="font-medium">{groupLabel}</h3>
                             <div className="flex flex-col gap-2">
-                              {menus.map(({ icon: Icon, label }) => (
+                              {menus.map(({ href, label, id }) => (
                                 <div 
                                   className="flex items-center justify-between"
                                   key={label}
                                 >
                                   <div className="flex gap-4">
-                                    <Icon />
+                                    { hrefToIcon[href] }
                                     <span>{label}</span>
                                   </div>
 
                                   <div>
                                     <Checkbox
                                       id={`${groupLabel}-${label}`}
-                                      checked={managerAccessiblePages.includes(label)}
-                                      onCheckedChange={() => onSelectPage(label)}
+                                      defaultChecked={JSON.parse(localStorage.getItem('menus')).map(({ id }) => id).includes(id)}
+                                      onCheckedChange={() => onSelectPage(id)}
                                     />
                                   </div>
                                 </div>
@@ -296,6 +336,7 @@ export default function ManageAccessModal ({
         </Modal.Content>
         <Modal.Footer>
           <Button
+            onClick={onSave}
             type="submit"
             className="text-white font-medium text-base py-3 px-11 bg-[#164F62] mt-1"
           >
