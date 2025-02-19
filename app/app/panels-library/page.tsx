@@ -222,7 +222,12 @@ export default function PanelsLibrary () {
 
       //@ts-ignore
       await PainelService.updatePainelById(selectedPanelToUpdate, {
-        painel_title_classname: `font-family: ${selectedFont}; font-size: ${panelFontSize}px; color: ${color};`,
+        painel_title_classname: `
+          font-family: ${selectedFont}; 
+          font-size: ${panelFontSize}px; 
+          color: ${color};
+          line-height: ${panelLineHeight};
+        `,
         background_url: firstLayerImageUrl,
         imgUrl: secondLayerImageUrl,
         button_url: thirdLayerImageUrl,
