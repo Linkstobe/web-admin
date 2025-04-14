@@ -1,83 +1,89 @@
-"use client"
+"use client";
 
-import { Table } from "@/components/table"
-import { Badge } from "@/components/ui/badge"
-import { ProjectService } from "@/services/project.service"
-import { UserService } from "@/services/user.service"
-import { LucideIcon, Settings, SquarePen, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Table } from "@/components/table";
+import { Badge } from "@/components/ui/badge";
+import { ProjectService } from "@/services/project.service";
+import { UserService } from "@/services/user.service";
+import { LucideIcon, Settings, SquarePen, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { cn } from "@/lib/utils"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import PlanChangeModal from "./plan-change-modal"
-import UserInfoChangeModal from "./user-info-change-modal"
+import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import PlanChangeModal from "./plan-change-modal";
+import UserInfoChangeModal from "./user-info-change-modal";
 
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
-import { useToast } from "@/hooks/use-toast"
-import { usePermission } from "@/hook/use-permission"
-import ConfirmationModal from "@/components/confirmation-modal"
-import Link from "next/link"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import { useToast } from "@/hooks/use-toast";
+import { usePermission } from "@/hook/use-permission";
+import ConfirmationModal from "@/components/confirmation-modal";
+import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 type SelectedActionIcon = {
-  delete: LucideIcon
-  updatePlan: LucideIcon
-}
+  delete: LucideIcon;
+  updatePlan: LucideIcon;
+};
 
-type planToUpdate = "free" | "pro" | "premium" 
+type planToUpdate = "free" | "pro" | "premium";
 
 export function PlansTable() {
-  const { toast } = useToast()
-  const { canEdit } = usePermission()
+  const { toast } = useToast();
+  const { canEdit } = usePermission();
 
-  const [bulkModeEnable, setBulkModeEnable] = useState<boolean>(false)
-  const [selectedBulkAction, setSelectedBulkAction] = useState<string>("")
-  const [selectedProjectsId, setSelectedProjectsId] = useState<number[]>([])
+  const [bulkModeEnable, setBulkModeEnable] = useState<boolean>(false);
+  const [selectedBulkAction, setSelectedBulkAction] = useState<string>("");
+  const [selectedProjectsId, setSelectedProjectsId] = useState<number[]>([]);
 
-  const [allProjects, setAllProjects] = useState([])
-  const [filteredProjects, setFilteredProjects] = useState([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [allProjects, setAllProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const onFilterProject = (value: string) => {
-    if (value.trim() === "") { 
-      setFilteredProjects(allProjects) 
-      return
+    if (value.trim() === "") {
+      setFilteredProjects(allProjects);
+      return;
     }
 
-    const filteredData = allProjects.filter(item =>
+    const filteredData = allProjects.filter((item) =>
       Object.values(item).some(
-        field => typeof field === 'string' && field.toLowerCase().includes(value.trim().toLowerCase())
+        (field) =>
+          typeof field === "string" &&
+          field.toLowerCase().includes(value.trim().toLowerCase())
       )
     );
 
-    setFilteredProjects(filteredData)
-    setCurrentPage(1)
-  }
+    setFilteredProjects(filteredData);
+    setCurrentPage(1);
+  };
 
   const selectedActionIcon: SelectedActionIcon = {
     delete: Trash2,
-    updatePlan: SquarePen
-  }
+    updatePlan: SquarePen,
+  };
 
   const onSelecteProject = (projectId: number, isSelected: boolean) => {
     setSelectedProjectsId((prevSelected) =>
       isSelected
         ? [...prevSelected, projectId]
         : prevSelected.filter((id: number) => id !== projectId)
-    )
-  }
-  
+    );
+  };
+
   const getAllProject = async () => {
-    const accountWithTemplateId = 1425
-    const projectWithAdvancedPanels = 1499
-    const projectWithBasicPanels = 1500
-    const projects = await ProjectService.getAllProject()
-    const validProjects = projects
-      .filter(({ linkstoBe, user_id, id }) => 
+    const accountWithTemplateId = 1425;
+    const projectWithAdvancedPanels = 1499;
+    const projectWithBasicPanels = 1500;
+    const projects = await ProjectService.getAllProject();
+    const validProjects = projects.filter(
+      ({ linkstoBe, user_id, id }) =>
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe") &&
@@ -87,221 +93,236 @@ export function PlansTable() {
         id !== projectWithAdvancedPanels &&
         id !== projectWithBasicPanels &&
         id !== 1495
-      )
+    );
 
-    const users = await UserService.getAllUsers()
+    const users = await UserService.getAllUsers();
 
-    const combinedData = validProjects.map(project => {
-      const user = users.find(user => user.id === project.user_id);
+    const combinedData = validProjects.map((project) => {
+      const user = users.find((user) => user.id === project.user_id);
 
       const decodedToken = project?.role ? jwtDecode(project.role) : {};
-      // @ts-ignore
-      const plan = decodedToken?.role && decodedToken.role !== "basic" ? decodedToken.role : "FREE";
-      
+      const plan =
+        // @ts-ignore
+        decodedToken?.role && decodedToken.role !== "basic"
+          ? // @ts-ignore
+            decodedToken.role
+          : "FREE";
+
       return {
         linkstoBe: project.linkstoBe,
-        name: user?.name || '',
-        email: user?.email || '',
-        cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
+        name: user?.name || "",
+        email: user?.email || "",
+        cellphone:
+          user?.cellphone === "00" || user?.cellphone === "string"
+            ? "sem número"
+            : user?.cellphone,
         plan,
         status: project.blocked ? "Bloqueado" : "Ativo",
         project_id: project.id,
         user_id: user.id,
         isTrial: user?.flag_user_trial,
-        projectCreatedAt: new Date(project.createdAt).toLocaleDateString('pt-BR')
+        projectCreatedAt: new Date(project.createdAt).toLocaleDateString(
+          "pt-BR"
+        ),
       };
     });
-    
-    setAllProjects(combinedData)
-    setFilteredProjects(combinedData)
-  }
+
+    setAllProjects(combinedData);
+    setFilteredProjects(combinedData);
+  };
 
   useEffect(() => {
-    getAllProject()
-  }, [])
+    getAllProject();
+  }, []);
 
   const paginatedProjects = filteredProjects.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  )
+  );
 
   const handlePageChange = (event, page) => {
-    setCurrentPage(page)
-  }
+    setCurrentPage(page);
+  };
 
   const handleDeleteProject = async (id: string | number) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao excluir projeto",
-          description: "Você não possui permissão para excluir o projeto. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para excluir o projeto. Entre em contato com o administrador.",
+        });
+        return;
       }
 
-      await ProjectService.deleteProjectByID(id)
+      await ProjectService.deleteProjectByID(id);
       toast({
         variant: "success",
         title: "Projeto excluído!",
         description: "O projeto foi excluído com sucesso.",
-      })
+      });
 
-      await getAllProject()
+      await getAllProject();
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast({
         variant: "destructive",
         title: "Erro ao excluir o projeto",
-        description: "Ocorreu um erro ao fazer ao excluir o projeto. Tente novamente.",
-      })
+        description:
+          "Ocorreu um erro ao fazer ao excluir o projeto. Tente novamente.",
+      });
     }
-  }
+  };
 
   const onResetBulkActions = () => {
-    setBulkModeEnable(false)
-    setSelectedBulkAction("")
-    setSelectedProjectsId([])
-  }
+    setBulkModeEnable(false);
+    setSelectedBulkAction("");
+    setSelectedProjectsId([]);
+  };
 
   const onDeleteSelectedProjects = async () => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao excluir projeto",
-          description: "Você não possui permissão para excluir o projeto. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para excluir o projeto. Entre em contato com o administrador.",
+        });
+        return;
       }
-      
+
       const deletePromises = selectedProjectsId.map((id) =>
         ProjectService.deleteProjectByID(id)
-      )
+      );
 
-      await Promise.all(deletePromises)
+      await Promise.all(deletePromises);
       toast({
         variant: "success",
         title: "Projetos excluídos!",
         description: "Os projetos foram excluídos com sucesso.",
-      })
-      await getAllProject()
+      });
+      await getAllProject();
     } catch (error) {
-      console.log("PlansTable: ", error)
+      console.log("PlansTable: ", error);
     } finally {
-      onResetBulkActions()
+      onResetBulkActions();
     }
-  }
+  };
 
   const onUpdateProjectPlans = async (plan: planToUpdate) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao trocar os planos",
-          description: "Você não possui permissão para trocar os planos de projetos. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para trocar os planos de projetos. Entre em contato com o administrador.",
+        });
+        return;
       }
 
-      const updatePlanPromises = selectedProjectsId.map((id) => 
+      const updatePlanPromises = selectedProjectsId.map((id) =>
         ProjectService.updateProjectById(id, {
-          role: plan
+          role: plan,
         })
-      )
+      );
 
-      await Promise.all(updatePlanPromises)
+      await Promise.all(updatePlanPromises);
 
       toast({
         variant: "success",
         title: "Trocas concluídas!",
         description: "Os planos foram trocados com sucesso.",
-      })
+      });
 
-      await getAllProject()
+      await getAllProject();
     } catch (error) {
-      console.log("PlansTable: ", error)
+      console.log("PlansTable: ", error);
       toast({
         variant: "destructive",
         title: "Erro ao trocar os planos",
-        description: "Ocorreu um erro ao fazer a troca dos planos. Tente novamente.",
-      })
+        description:
+          "Ocorreu um erro ao fazer a troca dos planos. Tente novamente.",
+      });
     } finally {
-      onResetBulkActions()
+      onResetBulkActions();
     }
-  }
+  };
 
   const onBlockProject = async (id: number) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao bloquear projeto",
-          description: "Você não possui permissão para bloquear um projeto. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para bloquear um projeto. Entre em contato com o administrador.",
+        });
+        return;
       }
 
       await ProjectService.updateProjectById(id, {
-        blocked: true
-      })
+        blocked: true,
+      });
 
       toast({
         variant: "success",
         title: "Bloqueio concluído!",
         description: "O bloqueio foi feito com sucesso.",
-      })
-
+      });
     } catch (error) {
-      console.log("PlansTable: ", error)      
+      console.log("PlansTable: ", error);
       toast({
         variant: "destructive",
         title: "Erro ao bloquer o projeto",
         description: "Ocorreu um erro ao bloquear o projeto. Tente novamente.",
-      })
+      });
     }
-  }
+  };
 
   const onUnblockProject = async (id: number) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao desbloquear projeto",
-          description: "Você não possui permissão para desbloquear um projeto. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para desbloquear um projeto. Entre em contato com o administrador.",
+        });
+        return;
       }
 
       await ProjectService.updateProjectById(id, {
-        blocked: false
-      })
+        blocked: false,
+      });
 
       toast({
         variant: "success",
         title: "Desbloqueio concluído!",
         description: "O desbloqueio foi feito com sucesso.",
-      })
-
+      });
     } catch (error) {
-      console.log("PlansTable: ", error)
+      console.log("PlansTable: ", error);
       toast({
         variant: "destructive",
         title: "Erro ao desbloquear o projeto",
-        description: "Ocorreu um erro ao desbloquear o projeto. Tente novamente.",
-      })
+        description:
+          "Ocorreu um erro ao desbloquear o projeto. Tente novamente.",
+      });
     }
-  }
+  };
 
   const onGetCSV = () => {
     if (!allProjects || allProjects.length === 0) {
-      console.error("Nenhum dado disponível para gerar o CSV.")
-      return
+      console.error("Nenhum dado disponível para gerar o CSV.");
+      return;
     }
 
     const headers = [
@@ -312,7 +333,7 @@ export function PlansTable() {
       "Plano",
       "Status",
       "Data de criação",
-    ]
+    ];
 
     const csvRows = [
       headers.join(","),
@@ -329,68 +350,52 @@ export function PlansTable() {
           .map((field) => `"${field || ""}"`)
           .join(",")
       ),
-    ]
+    ];
 
-    const csvContent = csvRows.join("\n")
+    const csvContent = csvRows.join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.setAttribute("download", "tabela-planos.csv")
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "tabela-planos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <Table.Root>
       <Table.TopSection>
-        <Table.Title 
-          title="Usuários ativos"
-        />
+        <Table.Title title="Usuários ativos" />
 
-        <Table.Search
-          onChange={onFilterProject}
-          placeholder="Buscar"
-        />
+        <Table.Search onChange={onFilterProject} placeholder="Buscar" />
 
-        <div
-          className="flex items-center gap-4"
-        >
-          {
-            bulkModeEnable &&
-            <div
-              className="flex gap-2"
-            >
-              <Table.TableTopButtonCancel 
+        <div className="flex items-center gap-4">
+          {bulkModeEnable && (
+            <div className="flex gap-2">
+              <Table.TableTopButtonCancel
                 onCancel={() => {
-                  setBulkModeEnable(false)
-                  setSelectedBulkAction("")
+                  setBulkModeEnable(false);
+                  setSelectedBulkAction("");
                 }}
               />
-              
-              {
-                selectedBulkAction === "delete" &&
-                <Table.TopButtonConfirm 
-                  onConfirm={onDeleteSelectedProjects}
-                />
-              }
 
-              {
-                selectedBulkAction === "updatePlan" &&
+              {selectedBulkAction === "delete" && (
+                <Table.TopButtonConfirm onConfirm={onDeleteSelectedProjects} />
+              )}
+
+              {selectedBulkAction === "updatePlan" && (
                 <Popover>
                   <PopoverTrigger>
                     <Table.TopButtonConfirm />
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="p-0"
-                  >
+                  <PopoverContent className="p-0">
                     <Button
                       variant="outline"
                       className="w-full text-start justify-start rounded-none text-[#767676]"
                       onClick={async () => {
-                        await onUpdateProjectPlans("free")
+                        await onUpdateProjectPlans("free");
                       }}
                     >
                       Trocar para plano Free
@@ -399,7 +404,7 @@ export function PlansTable() {
                       variant="outline"
                       className="w-full text-start justify-start rounded-none text-[#767676]"
                       onClick={async () => {
-                        await onUpdateProjectPlans("pro")
+                        await onUpdateProjectPlans("pro");
                       }}
                     >
                       Trocar para plano Pro
@@ -408,17 +413,16 @@ export function PlansTable() {
                       variant="outline"
                       className="w-full text-start justify-start rounded-none text-[#767676]"
                       onClick={async () => {
-                        await onUpdateProjectPlans("premium")
+                        await onUpdateProjectPlans("premium");
                       }}
                     >
                       Trocar para plano Premium
                     </Button>
                   </PopoverContent>
                 </Popover>
-              }
-
+              )}
             </div>
-          }
+          )}
 
           <Popover>
             <PopoverTrigger>
@@ -427,28 +431,26 @@ export function PlansTable() {
                 className="text-white"
               />
             </PopoverTrigger>
-            <PopoverContent
-              className="p-0 w-48"
-            >
+            <PopoverContent className="p-0 w-48">
               <Button
                 variant="outline"
                 className="w-full text-start justify-start rounded-none text-[#767676]"
                 onClick={() => {
-                  setBulkModeEnable(true)
-                  setSelectedBulkAction("delete")
-                  setSelectedProjectsId([])
+                  setBulkModeEnable(true);
+                  setSelectedBulkAction("delete");
+                  setSelectedProjectsId([]);
                 }}
               >
                 Excluir vários projetos
               </Button>
-              
+
               <Button
                 variant="outline"
                 className="w-full text-start justify-start rounded-none text-[#767676]"
                 onClick={() => {
-                  setBulkModeEnable(true)
-                  setSelectedBulkAction("updatePlan")
-                  setSelectedProjectsId([])
+                  setBulkModeEnable(true);
+                  setSelectedBulkAction("updatePlan");
+                  setSelectedProjectsId([]);
                 }}
               >
                 Atualizar vários planos
@@ -464,13 +466,25 @@ export function PlansTable() {
             </PopoverContent>
           </Popover>
         </div>
-        
       </Table.TopSection>
 
       <Table.Content>
         <Table.HeaderSection>
           <Table.Row>
-            <Table.HeaderItem title="Nome do usuário" />
+            <Table.HeaderItem
+              title="Nome do usuário"
+              className="flex items-center gap-4"
+            >
+              {bulkModeEnable && (
+                <Checkbox
+                  onCheckedChange={(isChecked: boolean) => {
+                    paginatedProjects.forEach(({ project_id }) => {
+                      onSelecteProject(project_id, isChecked);
+                    });
+                  }}
+                />
+              )}
+            </Table.HeaderItem>
             <Table.HeaderItem title="Link do usuário" />
             <Table.HeaderItem title="Email" />
             <Table.HeaderItem title="Telefone" />
@@ -482,27 +496,37 @@ export function PlansTable() {
         </Table.HeaderSection>
 
         <Table.BodySection>
-          {
-            paginatedProjects.map(({ name, linkstoBe, email, cellphone, projectCreatedAt, status, plan, project_id, user_id }, index) => (
+          {paginatedProjects.map(
+            (
+              {
+                name,
+                linkstoBe,
+                email,
+                cellphone,
+                projectCreatedAt,
+                status,
+                plan,
+                project_id,
+                user_id,
+              },
+              index
+            ) => (
               <Table.Row key={index}>
                 <Table.BodyItem>
-                  <div
-                    className="flex items-center gap-1"
-                  >
-                    {
-                      bulkModeEnable &&
-                      <Checkbox 
+                  <div className="flex items-center gap-1">
+                    {bulkModeEnable && (
+                      <Checkbox
                         id={linkstoBe}
                         onCheckedChange={(isChecked: boolean) => {
                           onSelecteProject(project_id, isChecked);
                         }}
+                        checked={selectedProjectsId.includes(
+                          Number(project_id)
+                        )}
                       />
-                    }
-                    
-                    <Label
-                      htmlFor={linkstoBe}
-                      className="text-xs"
-                    >
+                    )}
+
+                    <Label htmlFor={linkstoBe} className="text-xs">
                       {name}
                     </Label>
                   </div>
@@ -522,22 +546,21 @@ export function PlansTable() {
                 <Table.BodyItem text={projectCreatedAt} />
                 <Table.BodyItem>
                   <Badge
-                    className={
-                      cn(
-                        plan?.toUpperCase() === "PREMIUM" ? "bg-[#299FC7]"
-                        : (plan?.toUpperCase() === "PRO" ? "bg-[#164F62]"
-                          : "bg-[#20B120]"
-                        )
-                      )
-                    }
+                    className={cn(
+                      plan?.toUpperCase() === "PREMIUM"
+                        ? "bg-[#299FC7]"
+                        : plan?.toUpperCase() === "PRO"
+                        ? "bg-[#164F62]"
+                        : "bg-[#20B120]"
+                    )}
                   >
-                    { plan?.toUpperCase() }
+                    {plan?.toUpperCase()}
                   </Badge>
                 </Table.BodyItem>
                 <Table.BodyItem>
                   <Popover>
                     <PopoverTrigger>
-                      <Table.BasicAction 
+                      <Table.BasicAction
                         tooltipText="Configurações"
                         icon={Settings}
                         className="text-[#767676]"
@@ -550,7 +573,9 @@ export function PlansTable() {
                         name={name}
                         linkstoBe={linkstoBe}
                         email={email}
-                        cellphone={cellphone === "sem número" ? "55" : cellphone}
+                        cellphone={
+                          cellphone === "sem número" ? "55" : cellphone
+                        }
                       >
                         <Button
                           variant="outline"
@@ -579,37 +604,34 @@ export function PlansTable() {
                           Excluir projeto
                         </Button>
                       </ConfirmationModal>
-                      
-                      {
-                        status === "Ativo" 
-                        ? (
-                          <ConfirmationModal
-                            onConfirm={() => onBlockProject(project_id)}
-                            title="Confirmação de bloqueio do projeto"
-                            description="Você está prestes a bloquear esse projeto. O projeto passará a não ser mais visível, e não poderá realizar ações. Deseja bloquear projeto?"
+
+                      {status === "Ativo" ? (
+                        <ConfirmationModal
+                          onConfirm={() => onBlockProject(project_id)}
+                          title="Confirmação de bloqueio do projeto"
+                          description="Você está prestes a bloquear esse projeto. O projeto passará a não ser mais visível, e não poderá realizar ações. Deseja bloquear projeto?"
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full text-start justify-start rounded-none text-[#767676]"
                           >
-                            <Button
-                              variant="outline"
-                              className="w-full text-start justify-start rounded-none text-[#767676]"
-                            >
-                              Bloquear Projeto
-                            </Button>
-                          </ConfirmationModal>
-                        ) : (
-                          <ConfirmationModal
-                            onConfirm={() => onUnblockProject(project_id)}
-                            title="Confirmação de desbloqueio do projeto"
-                            description="Você está prestes a desbloquear esse projeto. O projeto passará a ser visível de novo, e poderá realizar ações dentro da plataforma. Deseja desbloquear projeto?"
+                            Bloquear Projeto
+                          </Button>
+                        </ConfirmationModal>
+                      ) : (
+                        <ConfirmationModal
+                          onConfirm={() => onUnblockProject(project_id)}
+                          title="Confirmação de desbloqueio do projeto"
+                          description="Você está prestes a desbloquear esse projeto. O projeto passará a ser visível de novo, e poderá realizar ações dentro da plataforma. Deseja desbloquear projeto?"
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full text-start justify-start rounded-none text-[#767676]"
                           >
-                            <Button
-                              variant="outline"
-                              className="w-full text-start justify-start rounded-none text-[#767676]"
-                            >
-                              Desbloquear Projeto
-                            </Button>
-                          </ConfirmationModal>
-                        )
-                      }
+                            Desbloquear Projeto
+                          </Button>
+                        </ConfirmationModal>
+                      )}
 
                       <Link
                         href={"https://app.linksto.be/panels/" + project_id}
@@ -626,24 +648,24 @@ export function PlansTable() {
                   </Popover>
                 </Table.BodyItem>
               </Table.Row>
-            ))
-          }
+            )
+          )}
         </Table.BodySection>
       </Table.Content>
 
       <Table.Footer>
         <div className="px-4 py-2 flex justify-end">
           <Stack>
-            <Pagination 
-              count={Math.ceil(filteredProjects.length / itemsPerPage)} 
+            <Pagination
+              count={Math.ceil(filteredProjects.length / itemsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
-              variant="outlined" 
-              shape="rounded" 
+              variant="outlined"
+              shape="rounded"
             />
           </Stack>
         </div>
       </Table.Footer>
     </Table.Root>
-  )
+  );
 }

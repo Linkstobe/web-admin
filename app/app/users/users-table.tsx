@@ -1,10 +1,14 @@
-'use client'
+"use client";
 import ConfirmationModal from "@/components/confirmation-modal";
 import { Table } from "@/components/table";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { usePermission } from "@/hook/use-permission";
 import { useToast } from "@/hooks/use-toast";
 import { IProject } from "@/interfaces/IProjects";
@@ -19,292 +23,287 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type TableMetrics = {
-  id: string | number
-  name: string
-  email: string
-  cellphone: string
-  status: string
-  projectCount: string | number
-  userProjects: IProject[]
-}
+  id: string | number;
+  name: string;
+  email: string;
+  cellphone: string;
+  status: string;
+  projectCount: string | number;
+  userProjects: IProject[];
+};
 
 type SelectedActionIcon = {
-  delete: LucideIcon
-  block: LucideIcon
-}
+  delete: LucideIcon;
+  block: LucideIcon;
+};
 
-export default function UsersTable () {
-  const { toast } = useToast()
-  const { canEdit } = usePermission()
+export default function UsersTable() {
+  const { toast } = useToast();
+  const { canEdit } = usePermission();
 
-  const [bulkModeEnable, setBulkModeEnable] = useState<boolean>(false)
-  const [selectedBulkAction, setSelectedBulkAction] = useState<string>("")
-  const [selectedUsersId, setSelectedUsersId] = useState<number[]>([])
+  const [bulkModeEnable, setBulkModeEnable] = useState<boolean>(false);
+  const [selectedBulkAction, setSelectedBulkAction] = useState<string>("");
+  const [selectedUsersId, setSelectedUsersId] = useState<number[]>([]);
 
-  const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>(undefined)
-  const [filteredTableMetrics, setFilteredTableMetrics] = useState<TableMetrics[]>([])
+  const [tableMetrics, setTableMetrics] = useState<TableMetrics[]>(undefined);
+  const [filteredTableMetrics, setFilteredTableMetrics] = useState<
+    TableMetrics[]
+  >([]);
 
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const metricsPerPage: number = 10
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const metricsPerPage: number = 10;
 
   const paginatedMetrics: TableMetrics[] = filteredTableMetrics.slice(
     (currentPage - 1) * metricsPerPage,
     currentPage * metricsPerPage
-  ) 
+  );
 
   const handlePageChange = (event: any, page: number): void => {
-    setCurrentPage(page)
-  }
+    setCurrentPage(page);
+  };
 
-   const onSelecteUser = (projectId: number, isSelected: boolean) => {
+  const onSelecteUser = (projectId: number, isSelected: boolean) => {
     setSelectedUsersId((prevSelected) =>
       isSelected
         ? [...prevSelected, projectId]
         : prevSelected.filter((id: number) => id !== projectId)
-    )
-  }
+    );
+  };
 
   const onFilterMetric = (value: string): void => {
     if (value.trim() === "") {
-      setFilteredTableMetrics(tableMetrics)
-      return
+      setFilteredTableMetrics(tableMetrics);
+      return;
     }
 
     const filteredData: TableMetrics[] = tableMetrics.filter((item) =>
       Object.values(item).some((field) =>
         String(field).toLowerCase().includes(value.trim().toLowerCase())
       )
-    )
+    );
 
-    setFilteredTableMetrics(filteredData)
-    setCurrentPage(1)
-  }
+    setFilteredTableMetrics(filteredData);
+    setCurrentPage(1);
+  };
 
   const selectedActionIcon: SelectedActionIcon = {
     delete: Trash2,
-    block: LockKeyhole 
-  }
+    block: LockKeyhole,
+  };
 
-  const projectDefaultImage = "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp"
+  const projectDefaultImage =
+    "https://srv538807.hstgr.cloud/uploads/file-1729101715653-720592456.webp";
   const roleStyle = {
-    "basic": "bg-[#20B120]",
-    "free": "bg-[#20B120]",
-    "pro": "bg-[#164F62]",
-    "premium": "bg-[#299FC7]",
-  }
+    basic: "bg-[#20B120]",
+    free: "bg-[#20B120]",
+    pro: "bg-[#164F62]",
+    premium: "bg-[#299FC7]",
+  };
 
   const onResetBulkActions = () => {
-    setBulkModeEnable(false)
-    setSelectedBulkAction("")
-    setSelectedUsersId([])
-  }
+    setBulkModeEnable(false);
+    setSelectedBulkAction("");
+    setSelectedUsersId([]);
+  };
 
   const onGetAllUsers = async () => {
-    const users: IUser[] = await UserService.getAllUsers()
-    const projects: IProject[] = await ProjectService.getAllProject()
+    const users: IUser[] = await UserService.getAllUsers();
+    const projects: IProject[] = await ProjectService.getAllProject();
 
-    const tableValues: TableMetrics[] = users.map(user => {
-      const userProjects = projects.filter(project => project.user_id === user.id);
+    const tableValues: TableMetrics[] = users.map((user) => {
+      const userProjects = projects.filter(
+        (project) => project.user_id === user.id
+      );
 
       return {
         id: user.id,
         name: user.name,
         email: user.email,
-        cellphone: user?.cellphone === "00" || user?.cellphone === "string" ? "sem número" : user?.cellphone,
+        cellphone:
+          user?.cellphone === "00" || user?.cellphone === "string"
+            ? "sem número"
+            : user?.cellphone,
         status: user.blocked ? "Bloqueado" : "Ativo",
         userProjects,
-        projectCount: userProjects.length
-      }
-    })
+        projectCount: userProjects.length,
+      };
+    });
 
-    setTableMetrics(tableValues)
-    setFilteredTableMetrics(tableValues)
-  }
+    setTableMetrics(tableValues);
+    setFilteredTableMetrics(tableValues);
+  };
 
   const onDeleteUser = async (id: string | number) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
 
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao excluir usuário",
-          description: "Você não possui permissão para excluir o usuário. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para excluir o usuário. Entre em contato com o administrador.",
+        });
+        return;
       }
 
-      await UserService.deleteUserById(id)
+      await UserService.deleteUserById(id);
       toast({
         variant: "success",
         title: "Usuário excluído!",
         description: "O usuário foi excluído com sucesso.",
-      })
+      });
 
-      await onGetAllUsers()
+      await onGetAllUsers();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Erro ao excluir usuário",
         description: "Ocorreu um erro ao excluir usuário. Tente novamente.",
-      })
+      });
     }
-  }
+  };
 
   const onBlockUser = async (id: string | number) => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
 
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao excluir usuário",
-          description: "Você não possui permissão para bloquear o usuário. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para bloquear o usuário. Entre em contato com o administrador.",
+        });
+        return;
       }
 
       await UserService.updateUserById(id, {
-        blocked: true
-      })
+        blocked: true,
+      });
       toast({
         variant: "success",
         title: "Usuário bloqueado!",
         description: "O usuário foi bloqueado com sucesso.",
-      })
+      });
 
-      await onGetAllUsers()
+      await onGetAllUsers();
     } catch (error) {
-      console.log("UsersTable: ", error)
+      console.log("UsersTable: ", error);
       toast({
         variant: "destructive",
         title: "Erro ao bloquear usuário",
         description: "Ocorreu um erro ao bloquear usuário. Tente novamente.",
-      })
+      });
     }
-  
-  }
+  };
 
   const onDeleteSelectedUsers = async () => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao excluir usuários",
-          description: "Você não possui permissão para excluir usuários. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para excluir usuários. Entre em contato com o administrador.",
+        });
+        return;
       }
 
       const deletePromises = selectedUsersId.map((id) =>
         UserService.deleteUserById(id)
-      )
+      );
 
-      await Promise.allSettled(deletePromises)
+      await Promise.allSettled(deletePromises);
 
       toast({
         variant: "success",
         title: "Usuários excluídos!",
         description: "Os usuários foram excluídos com sucesso.",
-      })
+      });
 
-      await onGetAllUsers()
+      await onGetAllUsers();
     } catch (error) {
-      console.log("UsersTable", error)
+      console.log("UsersTable", error);
       toast({
         variant: "destructive",
         title: "Erro ao excluir usuários",
         description: "Ocorreu um erro ao excluir os usuários. Tente novamente.",
-      })
+      });
     } finally {
-      onResetBulkActions()
+      onResetBulkActions();
     }
-  }
+  };
 
   const onBlockSelectedUsers = async () => {
     try {
-      const userCanEdit = canEdit()
+      const userCanEdit = canEdit();
       if (!userCanEdit) {
         toast({
           variant: "destructive",
           title: "Erro ao bloquear usuários",
-          description: "Você não possui permissão para bloquear usuários. Entre em contato com o administrador.",
-        })
-        return
+          description:
+            "Você não possui permissão para bloquear usuários. Entre em contato com o administrador.",
+        });
+        return;
       }
 
-      const blockPromises = selectedUsersId.map((id) => 
+      const blockPromises = selectedUsersId.map((id) =>
         UserService.updateUserById(id, { blocked: true })
-      )
+      );
 
-      await Promise.allSettled(blockPromises)
+      await Promise.allSettled(blockPromises);
 
       toast({
         variant: "success",
         title: "Usuários bloqueados!",
         description: "Os usuários foram bloqueados com sucesso.",
-      })
-      await onGetAllUsers()
+      });
+      await onGetAllUsers();
     } catch (error) {
-      console.log("UsersTable", error)
+      console.log("UsersTable", error);
       toast({
         variant: "destructive",
         title: "Erro ao bloquear usuário",
-        description: "Ocorreu um erro ao bloquear os usuários. Tente novamente.",
-      })
+        description:
+          "Ocorreu um erro ao bloquear os usuários. Tente novamente.",
+      });
     } finally {
-      onResetBulkActions()
+      onResetBulkActions();
     }
-  }
+  };
 
   useEffect(() => {
-    onGetAllUsers()
-  }, [])
+    onGetAllUsers();
+  }, []);
 
   return (
     <Table.Root className={!tableMetrics && "animate-pulse"}>
       <Table.TopSection>
-        <Table.Title 
-          title="Usuários ativos"
-        />
+        <Table.Title title="Usuários ativos" />
 
-        <Table.Search 
-          placeholder="Buscar"
-          onChange={onFilterMetric}
-        />
+        <Table.Search placeholder="Buscar" onChange={onFilterMetric} />
 
-        <div
-          className="flex items-center gap-4"
-        >
-          {
-            bulkModeEnable &&
-            <div
-              className="flex gap-2"
-            >
-              <Table.TableTopButtonCancel 
+        <div className="flex items-center gap-4">
+          {bulkModeEnable && (
+            <div className="flex gap-2">
+              <Table.TableTopButtonCancel
                 onCancel={() => {
-                  setBulkModeEnable(false)
-                  setSelectedBulkAction("")
+                  setBulkModeEnable(false);
+                  setSelectedBulkAction("");
                 }}
               />
-              
-              {
-                selectedBulkAction === "delete" &&
-                <Table.TopButtonConfirm 
-                  onConfirm={onDeleteSelectedUsers}
-                />
-              }
 
-              {
-                selectedBulkAction === "block" &&
-                <Table.TopButtonConfirm 
-                  onConfirm={onBlockSelectedUsers}
-                />
-              }
+              {selectedBulkAction === "delete" && (
+                <Table.TopButtonConfirm onConfirm={onDeleteSelectedUsers} />
+              )}
 
+              {selectedBulkAction === "block" && (
+                <Table.TopButtonConfirm onConfirm={onBlockSelectedUsers} />
+              )}
             </div>
-          }
+          )}
 
           <Popover>
             <PopoverTrigger>
@@ -313,28 +312,26 @@ export default function UsersTable () {
                 className="text-white"
               />
             </PopoverTrigger>
-            <PopoverContent
-              className="p-0 w-48"
-            >
+            <PopoverContent className="p-0 w-48">
               <Button
                 variant="outline"
                 className="w-full text-start justify-start rounded-none text-[#767676]"
                 onClick={() => {
-                  setBulkModeEnable(true)
-                  setSelectedBulkAction("delete")
-                  setSelectedUsersId([])
+                  setBulkModeEnable(true);
+                  setSelectedBulkAction("delete");
+                  setSelectedUsersId([]);
                 }}
               >
                 Excluir vários usuários
               </Button>
-              
+
               <Button
                 variant="outline"
                 className="w-full text-start justify-start rounded-none text-[#767676]"
                 onClick={() => {
-                  setBulkModeEnable(true)
-                  setSelectedBulkAction("block")
-                  setSelectedUsersId([])
+                  setBulkModeEnable(true);
+                  setSelectedBulkAction("block");
+                  setSelectedUsersId([]);
                 }}
               >
                 Bloquear vários usuários
@@ -347,7 +344,20 @@ export default function UsersTable () {
       <Table.Content>
         <Table.HeaderSection>
           <Table.Row>
-            <Table.HeaderItem title="Nome do usuário" />
+            <Table.HeaderItem
+              title="Nome do usuário"
+              className="flex items-center gap-4"
+            >
+              {bulkModeEnable && (
+                <Checkbox
+                  onCheckedChange={(isChecked: boolean) => {
+                    paginatedMetrics.forEach(({ id }) => {
+                      onSelecteUser(Number(id), isChecked);
+                    });
+                  }}
+                />
+              )}
+            </Table.HeaderItem>
             <Table.HeaderItem title="Email" />
             <Table.HeaderItem title="Telefone" />
             <Table.HeaderItem title="Número de projetos" />
@@ -357,17 +367,23 @@ export default function UsersTable () {
         </Table.HeaderSection>
 
         <Table.BodySection>
-          {
-            paginatedMetrics.map(({ id, name, email, cellphone, projectCount, userProjects, status }, index) => (
-              <Table.Row
-                key={index}
-              >
+          {paginatedMetrics.map(
+            (
+              {
+                id,
+                name,
+                email,
+                cellphone,
+                projectCount,
+                userProjects,
+                status,
+              },
+              index
+            ) => (
+              <Table.Row key={index}>
                 <Table.BodyItem>
-                  <div
-                    className="flex items-center gap-1"
-                  >
-                    {
-                      bulkModeEnable &&
+                  <div className="flex items-center gap-1">
+                    {bulkModeEnable && (
                       <Checkbox
                         id={`${id}`}
                         checked={selectedUsersId.includes(Number(id))}
@@ -375,12 +391,9 @@ export default function UsersTable () {
                           onSelecteUser(Number(id), isChecked);
                         }}
                       />
-                    }
-                    
-                    <Label
-                      htmlFor={`${id}`}
-                      className="text-xs"
-                    >
+                    )}
+
+                    <Label htmlFor={`${id}`} className="text-xs">
                       {name}
                     </Label>
                   </div>
@@ -390,34 +403,27 @@ export default function UsersTable () {
                 <Table.BodyItem>
                   <Popover>
                     <PopoverTrigger>
-                      <span
-                        className="underline text-[#164F62] font-semibold"
-                      >
-                        { projectCount }
+                      <span className="underline text-[#164F62] font-semibold">
+                        {projectCount}
                       </span>
                     </PopoverTrigger>
 
-                    <PopoverContent
-                      className="flex flex-col gap-2"
-                    >
-                      {
-                        userProjects.map(({ id, logo_url, role, title, linkstoBe }) => (
+                    <PopoverContent className="flex flex-col gap-2">
+                      {userProjects.map(
+                        ({ id, logo_url, role, title, linkstoBe }) => (
                           <Link
                             key={id}
                             className="flex justify-between items-center bg-background shadow-sm hover:bg-accent hover:text-accent-foreground rounded-lg"
                             href={"https://linksto.be/" + linkstoBe}
                             target="_blank"
                           >
-                            
-                            <img 
+                            <img
                               src={logo_url || projectDefaultImage}
                               alt=""
                               className="rounded-full size-8 border object-cover"
                             />
 
-                            <span
-                              className="text-sm"
-                            >{ title }</span>
+                            <span className="text-sm">{title}</span>
 
                             <span
                               className={cn(
@@ -426,13 +432,11 @@ export default function UsersTable () {
                                 roleStyle[jwtDecode(role)?.role.toLowerCase()]
                               )}
                             >
-                              <Crown
-                                size={16}
-                              />
+                              <Crown size={16} />
                             </span>
                           </Link>
-                        ))
-                      }
+                        )
+                      )}
                     </PopoverContent>
                   </Popover>
                 </Table.BodyItem>
@@ -444,8 +448,7 @@ export default function UsersTable () {
                         icon={Settings}
                         tooltipText="Gerênciar"
                         className="text-[#767676]"
-                      >
-                      </Table.BasicAction>
+                      ></Table.BasicAction>
                     </PopoverTrigger>
                     <PopoverContent className="p-0 w-48">
                       <ConfirmationModal
@@ -476,8 +479,8 @@ export default function UsersTable () {
                   </Popover>
                 </Table.BodyItem>
               </Table.Row>
-            ))
-          }
+            )
+          )}
         </Table.BodySection>
       </Table.Content>
 
@@ -495,5 +498,5 @@ export default function UsersTable () {
         </div>
       </Table.Footer>
     </Table.Root>
-  )
+  );
 }
