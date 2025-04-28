@@ -9,6 +9,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePermission } from "@/hook/use-permission";
 import { useToast } from "@/hooks/use-toast";
 import { IProject } from "@/interfaces/IProjects";
@@ -18,7 +24,14 @@ import { ProjectService } from "@/services/project.service";
 import { UserService } from "@/services/user.service";
 import { Pagination, Stack } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-import { Crown, LockKeyhole, LucideIcon, Settings, Trash2 } from "lucide-react";
+import {
+  Building,
+  Crown,
+  LockKeyhole,
+  LucideIcon,
+  Settings,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -30,6 +43,7 @@ type TableMetrics = {
   status: string;
   projectCount: string | number;
   userProjects: IProject[];
+  isCompany: boolean;
 };
 
 type SelectedActionIcon = {
@@ -126,6 +140,7 @@ export default function UsersTable() {
         status: user.blocked ? "Bloqueado" : "Ativo",
         userProjects,
         projectCount: userProjects.length,
+        isCompany: user.company,
       };
     });
 
@@ -171,7 +186,7 @@ export default function UsersTable() {
       if (!userCanEdit) {
         toast({
           variant: "destructive",
-          title: "Erro ao excluir usuário",
+          title: "Erro ao bloquear usuário",
           description:
             "Você não possui permissão para bloquear o usuário. Entre em contato com o administrador.",
         });
@@ -194,6 +209,42 @@ export default function UsersTable() {
         variant: "destructive",
         title: "Erro ao bloquear usuário",
         description: "Ocorreu um erro ao bloquear usuário. Tente novamente.",
+      });
+    }
+  };
+
+  const onChangeUserToCompany = async (id: string | number) => {
+    try {
+      const userCanEdit = canEdit();
+
+      if (!userCanEdit) {
+        toast({
+          variant: "destructive",
+          title: "Erro ao transfomar usuário",
+          description:
+            "Você não possui permissão para transformar o usuário. Entre em contato com o administrador.",
+        });
+        return;
+      }
+
+      await UserService.updateUserById(id, {
+        company: true,
+      });
+
+      toast({
+        variant: "success",
+        title: "Usuário tranformado!",
+        description: "O usuário foi tranformado em empresa com sucesso.",
+      });
+
+      await onGetAllUsers();
+    } catch (error) {
+      console.log("UsersTable: ", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao transfomar em usuário empresa",
+        description:
+          "Ocorreu um erro ao transfomar em usuário empresa. Tente novamente.",
       });
     }
   };
@@ -377,6 +428,7 @@ export default function UsersTable() {
                 projectCount,
                 userProjects,
                 status,
+                isCompany,
               },
               index
             ) => (
@@ -393,8 +445,21 @@ export default function UsersTable() {
                       />
                     )}
 
-                    <Label htmlFor={`${id}`} className="text-xs">
+                    <Label
+                      htmlFor={`${id}`}
+                      className="text-xs flex items-center gap-4"
+                    >
                       {name}
+                      {isCompany && (
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Building size={16} />
+                            </TooltipTrigger>
+                            <TooltipContent>Usuário empresa</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </Label>
                   </div>
                 </Table.BodyItem>
@@ -450,7 +515,7 @@ export default function UsersTable() {
                         className="text-[#767676]"
                       ></Table.BasicAction>
                     </PopoverTrigger>
-                    <PopoverContent className="p-0 w-48">
+                    <PopoverContent className="p-0 w-64">
                       <ConfirmationModal
                         title="Confirmação de exclusão do usuário"
                         description="Você está prestes a excluir esse usuário. Isso implica na exclusão do usuário e de todos os seus itens. Deseja excluir usuário?"
@@ -473,6 +538,18 @@ export default function UsersTable() {
                           className="w-full text-start justify-start rounded-none text-[#767676]"
                         >
                           Bloquear usuário
+                        </Button>
+                      </ConfirmationModal>
+                      <ConfirmationModal
+                        title="Confirmação de transformação de usuário"
+                        description="Você está prestes a transformar esse usuário em um usuário empresa. Deseja transformar o usuário?"
+                        onConfirm={() => onChangeUserToCompany(id)}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full text-start justify-start rounded-none text-[#767676]"
+                        >
+                          Transformar em usuário empresa
                         </Button>
                       </ConfirmationModal>
                     </PopoverContent>

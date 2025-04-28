@@ -13,6 +13,7 @@ export interface IUser {
   permission: string;
   blocked: boolean;
   flag_user_trial: boolean;
+  company: boolean
 }
 
 export interface ICreateUser {
