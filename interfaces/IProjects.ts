@@ -15,19 +15,20 @@ export interface IProject {
     link_format: string;
     link_position: string;
   }[];
+  config_marketplace_afiliados: string;
   updatedAt: string;
   createdAt: string;
   arquived: boolean;
-  role?: string
-  referral_id: string
-  blocked: boolean
-  config?: object
-  title_classname?: string
-  description_classname?: string
-  hasCover?: boolean
-  background_image?: string
-  background_color?: string
-  background_effect?: string
+  role?: string;
+  referral_id: string;
+  blocked: boolean;
+  config?: object;
+  title_classname?: string;
+  description_classname?: string;
+  hasCover?: boolean;
+  background_image?: string;
+  background_color?: string;
+  background_effect?: string;
 }
 
 export interface IUpdateProject extends Partial<IProject> {}
@@ -45,6 +46,6 @@ export interface ICreateProject {
     social_media: string;
   }[];
   arquived: boolean;
-  blocked: boolean
-  config?: object
+  blocked: boolean;
+  config?: object;
 }

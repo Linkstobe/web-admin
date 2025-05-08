@@ -83,7 +83,7 @@ export function PlansTable() {
     const projectWithBasicPanels = 1500;
     const projects = await ProjectService.getAllProject();
     const validProjects = projects.filter(
-      ({ linkstoBe, user_id, id }) =>
+      ({ linkstoBe, user_id, id, config_marketplace_afiliados }) =>
         !linkstoBe.includes("temanovo_") &&
         !linkstoBe.includes("tema_") &&
         !linkstoBe.includes("modelos_linkstobe") &&
@@ -92,7 +92,9 @@ export function PlansTable() {
         user_id !== accountWithTemplateId &&
         id !== projectWithAdvancedPanels &&
         id !== projectWithBasicPanels &&
-        id !== 1495
+        id !== 1495 &&
+        JSON.parse(config_marketplace_afiliados)?.project_type !==
+          "template-afiliado"
     );
 
     const users = await UserService.getAllUsers();
