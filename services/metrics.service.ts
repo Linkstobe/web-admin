@@ -19,8 +19,17 @@ export const MetricsServices = {
     const { data } = await Api.get<IMetric[]>(`/metrics/project/${id}`);
     return data;
   },
-  async onGetAllMetricsByType(type: string) {
-    const { data } = await Api.get<IMetric[]>(`/metrics/type/${type}`);
+  async onGetAllMetricsByType(
+    type: string,
+    startDate?: string,
+    endDate?: string
+  ) {
+    const url = new URL(`/metrics/type/${type}`, Api.defaults.baseURL);
+    if (startDate) url.searchParams.append("start", startDate);
+    if (endDate) url.searchParams.append("end", endDate);
+
+    const { data } = await Api.get<IMetric[]>(url.pathname + url.search);
+
     return data;
   },
 };
