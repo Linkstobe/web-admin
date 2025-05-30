@@ -48,7 +48,6 @@ export default function ReportContent() {
     from: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     to: new Date(),
   });
-  
 
   const [accessesMetrics, setAccessesMetrics] = useState<IMetric[]>();
   const [allAccessesMetrics, setAllAccessesMetrics] = useState<IMetric[]>();
@@ -116,49 +115,25 @@ export default function ReportContent() {
         const startDate = formatDateToSequelize(date.from);
         const endDate = formatDateToSequelize(date.to);
 
-        // const [accesses, clicks, socialMediaAccesses, locations] =
-        //   await Promise.all([
-        //     MetricsServices.onGetAllMetricsByType(
-        //       "origin:",
-        //       startDate,
-        //       endDate
-        //     ),
-        //     MetricsServices.onGetAllMetricsByType("click:", startDate, endDate),
-        //     MetricsServices.onGetAllMetricsByType(
-        //       "access:",
-        //       startDate,
-        //       endDate
-        //     ),
-        //     MetricsServices.onGetAllMetricsByType(
-        //       "location:",
-        //       startDate,
-        //       endDate
-        //     ),
-        //   ]);
-
-        const accesses = await MetricsServices.onGetAllMetricsByType(
-          "origin",
-          startDate,
-          endDate
-        );
-
-        const clicks = await MetricsServices.onGetAllMetricsByType(
-          "click",
-          startDate,
-          endDate
-        );
-
-        const socialMediaAccesses = await MetricsServices.onGetAllMetricsByType(
-          "access",
-          startDate,
-          endDate
-        );
-
-        const locations = await MetricsServices.onGetAllMetricsByType(
-          "location",
-          startDate,
-          endDate
-        );
+        const [accesses, clicks, socialMediaAccesses, locations] =
+          await Promise.all([
+            MetricsServices.onGetAllMetricsByType(
+              "origin:",
+              startDate,
+              endDate
+            ),
+            MetricsServices.onGetAllMetricsByType("click:", startDate, endDate),
+            MetricsServices.onGetAllMetricsByType(
+              "access:",
+              startDate,
+              endDate
+            ),
+            MetricsServices.onGetAllMetricsByType(
+              "location:",
+              startDate,
+              endDate
+            ),
+          ]);
 
         setAccessesMetrics(accesses);
         setAllAccessesMetrics(accesses);
@@ -177,7 +152,7 @@ export default function ReportContent() {
     };
 
     getAllMetrics();
-  }, []);
+  }, [date]);
 
   useEffect(() => {
     const getAllProjects = async () => {
@@ -191,7 +166,6 @@ export default function ReportContent() {
         const projectsByReferral = projects.filter(({ referral_id }) =>
           Number(referral_id)
         );
-        console.log({ projectsByReferral });
         setNewProjectsByReferral(projectsByReferral);
         setFilteredNewProjectsByReferral(projectsByReferral);
       } catch (error) {
