@@ -1,4 +1,5 @@
 import { 
+  BanknoteIcon,
   ChartNoAxesCombined, 
   ClipboardList, 
   Crown, 
@@ -166,6 +167,13 @@ export function handleGetMenuList(pathname: string): Group[] {
           label: "Usuários Admin",
           active: pathname.includes("/app/admin-users"),
           icon: UserPlus,
+          subMenus: []
+        },
+        {
+          href: "/app/withdraw-analysis",
+          label: "Análise de Saque",
+          active: pathname.includes("/app/withdraw-analysis"),
+          icon: BanknoteIcon,
           subMenus: []
         },
       ]
