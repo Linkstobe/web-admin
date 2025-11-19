@@ -13,7 +13,8 @@ export interface IUser {
   permission: string;
   blocked: boolean;
   flag_user_trial: boolean;
-  company: boolean
+  company: boolean;
+  afiliador: boolean;
 }
 
 export interface ICreateUser {
@@ -31,8 +32,8 @@ export interface ICreateUser {
 export interface IUploadUser extends Partial<IUser> {}
 
 export interface ILogin {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface ILoginResponse {

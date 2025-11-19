@@ -329,6 +329,32 @@ export default function UsersTable() {
     onGetAllUsers();
   }, []);
 
+  const onAllowUserToHaveAffiliates = async (id: string | number) => {
+    try {
+      await UserService.updateUserById(id, {
+        afiliador: true,
+      });
+
+      toast({
+        variant: "success",
+        title: "Usuário permitido!",
+        description: "O usuário foi permitido para ter afiliados com sucesso.",
+      });
+
+      onResetBulkActions();
+
+      await onGetAllUsers();
+    } catch (error) {
+      console.log("UsersTable", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao permitir usuário ter afiliados",
+        description:
+          "Ocorreu um erro ao permitir usuário ter afiliados. Tente novamente.",
+      });
+    }
+  };
+
   return (
     <Table.Root className={!tableMetrics && "animate-pulse"}>
       <Table.TopSection>
@@ -540,18 +566,34 @@ export default function UsersTable() {
                           Bloquear usuário
                         </Button>
                       </ConfirmationModal>
-                      <ConfirmationModal
-                        title="Confirmação de transformação de usuário"
-                        description="Você está prestes a transformar esse usuário em um usuário empresa. Deseja transformar o usuário?"
-                        onConfirm={() => onChangeUserToCompany(id)}
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full text-start justify-start rounded-none text-[#767676]"
+                      {!isCompany && (
+                        <ConfirmationModal
+                          title="Confirmação de transformação de usuário"
+                          description="Você está prestes a transformar esse usuário em um usuário empresa. Deseja transformar o usuário?"
+                          onConfirm={() => onChangeUserToCompany(id)}
                         >
-                          Transformar em usuário empresa
-                        </Button>
-                      </ConfirmationModal>
+                          <Button
+                            variant="outline"
+                            className="w-full text-start justify-start rounded-none text-[#767676]"
+                          >
+                            Transformar em usuário empresa
+                          </Button>
+                        </ConfirmationModal>
+                      )}
+                      {isCompany && (
+                        <ConfirmationModal
+                          title="Confirmação de transformação de usuário"
+                          description="Você está prestes a permitir que esse usuário tenha afiliados. Deseja permitir?"
+                          onConfirm={() => onAllowUserToHaveAffiliates(id)}
+                        >
+                          <Button
+                            variant="outline"
+                            className="w-full text-start justify-start rounded-none text-[#767676]"
+                          >
+                            Permitir usuário ter afiliados
+                          </Button>
+                        </ConfirmationModal>
+                      )}
                     </PopoverContent>
                   </Popover>
                 </Table.BodyItem>
