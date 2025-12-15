@@ -111,13 +111,22 @@ export default function EditCommissionModal({
       closeButtonRef.current?.click();
 
       onSuccess();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("EditCommissionModal:", error);
+      
+      // Extrair mensagem de erro do backend
+      let errorMessage = "Ocorreu um erro ao salvar os percentuais. Tente novamente.";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      }
+      
       toast({
         variant: "destructive",
         title: "Erro ao salvar configuração",
-        description:
-          "Ocorreu um erro ao salvar os percentuais. Tente novamente.",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
