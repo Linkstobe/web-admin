@@ -115,12 +115,12 @@ export default function SponsorsTable() {
               <Table.BodyItem>
                 <span
                   className={
-                    sponsor.configuredCount > 0
+                    sponsor.hasConfig
                       ? "text-green-600 font-semibold"
                       : "text-gray-400"
                   }
                 >
-                  {sponsor.configuredCount} / {sponsor.affiliatesCount}
+                  {sponsor.hasConfig ? "Configurado" : "Não configurado"}
                 </span>
               </Table.BodyItem>
               <Table.BodyItem>

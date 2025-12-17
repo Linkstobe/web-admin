@@ -97,7 +97,6 @@ export default function EditAffiliateCommissionModal({
       } else {
         await AffiliateSubCommissionConfigService.createConfig({
           user_id: affiliate.id,
-          sponsor_id: sponsorId,
           sub_percent_influencer,
           sub_percent_platform,
         });

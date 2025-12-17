@@ -16,13 +16,20 @@ export interface IEligibleInfluencer {
 }
 
 // Novas interfaces
+export interface ISponsorConfig {
+  id: number;
+  sub_percent_influencer: number;
+  sub_percent_platform: number;
+}
+
 export interface ISponsor {
   id: number;
   name: string;
   email: string;
   cellphone: string;
   affiliatesCount: number;
-  configuredCount: number;
+  hasConfig: boolean;
+  config: ISponsorConfig | null;
 }
 
 export interface IAffiliateConfig {
@@ -44,7 +51,6 @@ export interface IAffiliate {
 export interface IAffiliateSubCommissionConfig {
   id: number;
   user_id: number;
-  sponsor_id: number;
   sub_percent_influencer: number;
   sub_percent_platform: number;
   active: boolean;
@@ -54,7 +60,6 @@ export interface IAffiliateSubCommissionConfig {
 
 export interface ICreateSubCommissionConfig {
   user_id: number;
-  sponsor_id: number;
   sub_percent_influencer: number;
   sub_percent_platform: number;
 }
