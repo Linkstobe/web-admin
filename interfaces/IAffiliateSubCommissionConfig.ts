@@ -1,3 +1,4 @@
+// Legacy - manter para compatibilidade
 export interface IEligibleInfluencerPanel {
   id: number;
   banner_title: string | null;
@@ -14,9 +15,36 @@ export interface IEligibleInfluencer {
   panels: IEligibleInfluencerPanel[];
 }
 
+// Novas interfaces
+export interface ISponsor {
+  id: number;
+  name: string;
+  email: string;
+  cellphone: string;
+  affiliatesCount: number;
+  configuredCount: number;
+}
+
+export interface IAffiliateConfig {
+  id: number;
+  sub_percent_influencer: number;
+  sub_percent_platform: number;
+  active: boolean;
+}
+
+export interface IAffiliate {
+  id: number;
+  name: string;
+  email: string;
+  cellphone: string;
+  panelName: string | null;
+  config: IAffiliateConfig | null;
+}
+
 export interface IAffiliateSubCommissionConfig {
   id: number;
   user_id: number;
+  sponsor_id: number;
   sub_percent_influencer: number;
   sub_percent_platform: number;
   active: boolean;
@@ -26,6 +54,7 @@ export interface IAffiliateSubCommissionConfig {
 
 export interface ICreateSubCommissionConfig {
   user_id: number;
+  sponsor_id: number;
   sub_percent_influencer: number;
   sub_percent_platform: number;
 }

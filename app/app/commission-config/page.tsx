@@ -1,9 +1,9 @@
-import AffiliatorsTable from "./affiliators-table";
+import SponsorsTable from "./sponsors-table";
 
 export default function CommissionConfig() {
   return (
     <div>
-      <AffiliatorsTable />
+      <SponsorsTable />
     </div>
   );
 }
