@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import { 
   Card, 
   CardHeader, 
@@ -17,6 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import useAuth from "@/hook/use-auth"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 export default function Authentication() {
   const loginFormSchema = z.object({
@@ -38,14 +40,44 @@ export default function Authentication() {
 
   const onAuth = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {    
+  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+    setIsLoading(true)
+
     try {
       // @ts-ignore
       await onAuth(values)
+
+      toast({
+        variant: "success",
+        title: "Login realizado com sucesso!",
+        description: "Você está sendo redirecionado...",
+      })
+
       router.push("/app")
     } catch (error) {
       console.log(error);
+
+      let errorMessage = "Email ou senha incorretos. Tente novamente."
+
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } }
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer login",
+        description: errorMessage,
+      })
+
+      setIsLoading(false)
     }
   }
 
@@ -99,8 +131,8 @@ export default function Authentication() {
                   )}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Entrar
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </div>
           </form>
