@@ -5,10 +5,9 @@ import { Button } from "@/components/ui/button";
 import { IAffiliate } from "@/interfaces/IAffiliateSubCommissionConfig";
 import { AffiliateSubCommissionConfigService } from "@/services/affiliate-sub-commission-config.service";
 import { Pagination, Stack } from "@mui/material";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import EditAffiliateCommissionModal from "./edit-affiliate-commission-modal";
 
 interface Props {
   sponsorId: number;
@@ -73,11 +72,6 @@ export default function AffiliatesTable({ sponsorId }: Props) {
     loadAffiliates();
   }, [sponsorId]);
 
-  const formatPercent = (value: number | undefined) => {
-    if (value === undefined || value === null) return "Não configurado";
-    return `${parseFloat(value.toString()).toString()}%`;
-  };
-
   return (
     <Table.Root className={!affiliates && "animate-pulse"}>
       <Table.TopSection>
@@ -105,9 +99,6 @@ export default function AffiliatesTable({ sponsorId }: Props) {
             <Table.HeaderItem title="Nome" />
             <Table.HeaderItem title="Email" />
             <Table.HeaderItem title="Painel" />
-            <Table.HeaderItem title="% Sponsor" />
-            <Table.HeaderItem title="% Plataforma" />
-            <Table.HeaderItem title="" />
           </Table.Row>
         </Table.HeaderSection>
 
@@ -126,45 +117,6 @@ export default function AffiliatesTable({ sponsorId }: Props) {
                 <span className="text-sm text-gray-600">
                   {affiliate.panelName || "—"}
                 </span>
-              </Table.BodyItem>
-              <Table.BodyItem>
-                <span
-                  className={
-                    affiliate.config?.sub_percent_influencer
-                      ? "text-green-600 font-semibold"
-                      : "text-gray-400"
-                  }
-                >
-                  {formatPercent(affiliate.config?.sub_percent_influencer)}
-                </span>
-              </Table.BodyItem>
-              <Table.BodyItem>
-                <span
-                  className={
-                    affiliate.config?.sub_percent_platform
-                      ? "text-blue-600 font-semibold"
-                      : "text-gray-400"
-                  }
-                >
-                  {formatPercent(affiliate.config?.sub_percent_platform)}
-                </span>
-              </Table.BodyItem>
-              <Table.BodyItem>
-                <EditAffiliateCommissionModal
-                  affiliate={affiliate}
-                  sponsorId={sponsorId}
-                  existingConfig={affiliate.config}
-                  onSuccess={loadAffiliates}
-                >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-[#767676] hover:text-[#164F62]"
-                  >
-                    <Settings size={18} />
-                    <span className="ml-1">Configurar</span>
-                  </Button>
-                </EditAffiliateCommissionModal>
               </Table.BodyItem>
             </Table.Row>
           ))}

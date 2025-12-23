@@ -45,7 +45,6 @@ export interface IAffiliate {
   email: string;
   cellphone: string;
   panelName: string | null;
-  config: IAffiliateConfig | null;
 }
 
 export interface IAffiliateSubCommissionConfig {
