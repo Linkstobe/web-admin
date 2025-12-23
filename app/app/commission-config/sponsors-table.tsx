@@ -11,9 +11,10 @@ import {
 import { ISponsor } from "@/interfaces/IAffiliateSubCommissionConfig";
 import { AffiliateSubCommissionConfigService } from "@/services/affiliate-sub-commission-config.service";
 import { Pagination, Stack } from "@mui/material";
-import { ChevronRight, Users } from "lucide-react";
+import { ChevronRight, Settings, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import EditSponsorCommissionModal from "./edit-sponsor-commission-modal";
 
 export default function SponsorsTable() {
   const router = useRouter();
@@ -68,6 +69,11 @@ export default function SponsorsTable() {
     loadSponsors();
   }, []);
 
+  const formatPercent = (value: number | undefined) => {
+    if (value === undefined || value === null) return "Não configurado";
+    return `${parseFloat(value.toString()).toString()}%`;
+  };
+
   return (
     <Table.Root className={!sponsors && "animate-pulse"}>
       <Table.TopSection>
@@ -84,7 +90,8 @@ export default function SponsorsTable() {
             <Table.HeaderItem title="Nome" />
             <Table.HeaderItem title="Email" />
             <Table.HeaderItem title="Afiliados" />
-            <Table.HeaderItem title="Configurados" />
+            <Table.HeaderItem title="% Sponsor" />
+            <Table.HeaderItem title="% Plataforma" />
             <Table.HeaderItem title="" />
           </Table.Row>
         </Table.HeaderSection>
@@ -115,26 +122,53 @@ export default function SponsorsTable() {
               <Table.BodyItem>
                 <span
                   className={
-                    sponsor.hasConfig
+                    sponsor.config?.sub_percent_influencer
                       ? "text-green-600 font-semibold"
                       : "text-gray-400"
                   }
                 >
-                  {sponsor.hasConfig ? "Configurado" : "Não configurado"}
+                  {formatPercent(sponsor.config?.sub_percent_influencer)}
                 </span>
               </Table.BodyItem>
               <Table.BodyItem>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-[#767676] hover:text-[#164F62]"
-                  onClick={() =>
-                    router.push(`/app/commission-config/${sponsor.id}`)
+                <span
+                  className={
+                    sponsor.config?.sub_percent_platform
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-400"
                   }
                 >
-                  <span>Ver Afiliados</span>
-                  <ChevronRight size={18} />
-                </Button>
+                  {formatPercent(sponsor.config?.sub_percent_platform)}
+                </span>
+              </Table.BodyItem>
+              <Table.BodyItem>
+                <div className="flex items-center gap-2">
+                  <EditSponsorCommissionModal
+                    sponsor={sponsor}
+                    existingConfig={sponsor.config}
+                    onSuccess={loadSponsors}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#767676] hover:text-[#164F62]"
+                    >
+                      <Settings size={18} />
+                      <span className="ml-1">Configurar</span>
+                    </Button>
+                  </EditSponsorCommissionModal>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[#767676] hover:text-[#164F62]"
+                    onClick={() =>
+                      router.push(`/app/commission-config/${sponsor.id}`)
+                    }
+                  >
+                    <span>Ver Afiliados</span>
+                    <ChevronRight size={18} />
+                  </Button>
+                </div>
               </Table.BodyItem>
             </Table.Row>
           ))}
